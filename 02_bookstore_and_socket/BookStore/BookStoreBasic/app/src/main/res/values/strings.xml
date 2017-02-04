@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Book Store of Ekkasit Pinyoanuntapong</string>
+
+    <string name="add">Add</string>
+    <string name="checkout">Checkout</string>
+    <string name="delete">Delete</string>
+
+    <string name="search">Search</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="empty_cart">THE CART IS EMPTY!</string>
+</resources>
