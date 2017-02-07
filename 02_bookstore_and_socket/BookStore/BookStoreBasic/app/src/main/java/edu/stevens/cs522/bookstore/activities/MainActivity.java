@@ -18,6 +18,7 @@ import android.widget.ListView;
 
 import edu.stevens.cs522.bookstore.R;
 import edu.stevens.cs522.bookstore.adapter.BooksAdapter;
+import edu.stevens.cs522.bookstore.databases.CartDbAdapter;
 import edu.stevens.cs522.bookstore.entities.Author;
 import edu.stevens.cs522.bookstore.entities.Book;
 
@@ -43,19 +44,19 @@ public class MainActivity extends ListActivity {
 	// There is a reason this must be an ArrayList instead of a List.
 	@SuppressWarnings("unused")
 	private ArrayList<Book> shoppingCart;
-
 	private ArrayAdapter<Book> booksAdapter;
+
+	//DB
+	CartDbAdapter cartDbAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		// TODO check if there is saved UI state, and if so, restore it (i.e. the cart contents)
-		if(savedInstanceState==null) {
-			shoppingCart = new ArrayList<Book>();
-		}else {
-			shoppingCart = savedInstanceState.getParcelableArrayList(SHOPING_CART);
-		}
+		cartDbAdapter = new CartDbAdapter(this);
+		cartDbAdapter.open();
+		shoppingCart = cartDbAdapter.fetchAllBooks();
+		cartDbAdapter.logAllBooks();
+		cartDbAdapter.close();
 
 		// TODO Set the layout (use cart.xml layout)
 		setContentView(R.layout.cart);
@@ -76,6 +77,7 @@ public class MainActivity extends ListActivity {
 			}
 		});
 
+		CartDbAdapter cartDbAdapter = new CartDbAdapter(this);
 
 		//mockup book
 //		Author[] authors = {new Author("a","b","c")};
@@ -106,7 +108,7 @@ public class MainActivity extends ListActivity {
 		}
 		int id = (int) getListAdapter().getItemId(menuInfo.position);
         Book book = booksAdapter.getItem(id);
-        Log.i("ClICK list id",""+id);
+        Log.i("ClICK list id",""+id+","+book.id);
         Log.i("menu id:", Integer.toString(item.getItemId()) );
         switch(item.getItemId()){
             case DETAIL_REQUEST:
@@ -115,7 +117,10 @@ public class MainActivity extends ListActivity {
                 startActivityForResult(checkOutIntent, CHECKOUT_REQUEST);
                 break;
             case DELETE_REQUEST:
-                booksAdapter.remove( book );
+				cartDbAdapter.open();
+				cartDbAdapter.delete(book);
+				cartDbAdapter.close();
+				updateView();
                 break;
             default:
         }
@@ -179,16 +184,19 @@ public class MainActivity extends ListActivity {
 			case ADD_REQUEST:
 				if(resultCode == Activity.RESULT_OK){
 					Book book = (Book) intent.getParcelableExtra("book");
-					booksAdapter.add(book);
-				}else{
-
+					cartDbAdapter.open();
+					cartDbAdapter.insert(book);
+					cartDbAdapter.logAllBooks();
+					cartDbAdapter.close();
+					updateView();
 				}
 				break;
 			case CHECKOUT_REQUEST:
                 if(resultCode == Activity.RESULT_OK){
-                    shoppingCart = new ArrayList<Book>();
-                    booksAdapter = new BooksAdapter(this,shoppingCart);
-                    setListAdapter(booksAdapter);
+					cartDbAdapter.open();
+					cartDbAdapter.deleteAll();
+					cartDbAdapter.close();
+					updateView();
                 }
 				break;
 			default:
@@ -196,11 +204,14 @@ public class MainActivity extends ListActivity {
 		}
 	}
 
-	@Override
-	public void onSaveInstanceState(Bundle savedInstanceState) {
-		// TODO save the shopping cart contents (which should be a list of parcelables).
-		super.onSaveInstanceState(savedInstanceState);
-		savedInstanceState.putParcelableArrayList(SHOPING_CART,shoppingCart);
+	private void updateView(){
+		cartDbAdapter.open();
+		shoppingCart = cartDbAdapter.fetchAllBooks();
+		cartDbAdapter.logAllBooks();
+		cartDbAdapter.close();
+
+		booksAdapter = new BooksAdapter(this,shoppingCart);
+		setListAdapter(booksAdapter);
 	}
-	
+
 }

@@ -23,7 +23,7 @@ public class DetailBookActivity extends Activity {
         Book book = getIntent().getExtras().getParcelable("book");
         Log.i("book",book.title);
         ((TextView) findViewById(R.id.detailTitle)).setText(book.title);
-        ((TextView) findViewById(R.id.detailAuthor)).setText(book.getAuthorsTostring());
+        ((TextView) findViewById(R.id.detailAuthor)).setText(book.getAuthorsToString());
         ((TextView) findViewById(R.id.detailIsbn)).setText(book.isbn);
         ((TextView) findViewById(R.id.detailPrice)).setText(book.price);
     }
