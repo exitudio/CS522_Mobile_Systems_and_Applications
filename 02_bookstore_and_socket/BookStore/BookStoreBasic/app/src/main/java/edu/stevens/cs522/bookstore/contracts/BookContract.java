@@ -3,6 +3,7 @@ package edu.stevens.cs522.bookstore.contracts;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 import java.util.regex.Pattern;
 
@@ -64,8 +65,9 @@ public class BookContract implements BaseColumns {
 
     public static String[] getAuthors(Cursor cursor) {
         if (authorColumn < 0) {
-            authorColumn =  cursor.getColumnIndexOrThrow(AUTHORS);;
+            authorColumn =  cursor.getColumnIndexOrThrow(AUTHORS);
         }
+        Log.i("Author",cursor.getString(authorColumn));
         return readStringArray(cursor.getString(authorColumn));
     }
 
@@ -85,24 +87,21 @@ public class BookContract implements BaseColumns {
     public static void putIsbn(ContentValues values, String isbn) {
         values.put(ISBN, isbn);
     }
+
     /*
      * PRICE column
      */
 
     private static int priceColumn = -1;
 
-    public static String getPrice(Cursor cursor) {
+    public static Float getPrice(Cursor cursor) {
         if (priceColumn < 0) {
             priceColumn =  cursor.getColumnIndexOrThrow(PRICE);;
         }
-        return cursor.getString(priceColumn);
+        return cursor.getFloat(priceColumn);
     }
 
-    public static void putPrice(ContentValues values, String price) {
+    public static void putPrice(ContentValues values, Float price) {
         values.put(PRICE, price);
     }
-
-    // TODO complete definitions of other getter and setter operations
-
-
 }

@@ -37,9 +37,7 @@ public class BooksAdapter extends ArrayAdapter<Book> {
         title.setText(book.title);
         String authorsName = "";
         for(int i=0; i<=book.authors.length-1; i++){
-            authorsName += book.authors[i].firstName+" "+
-                            book.authors[i].middleInitial+" "+
-                            book.authors[i].lastName;
+            authorsName += book.authors[i].toString()+" ";
         }
         author.setText(authorsName);
         //	Return	the	completed	view	to	render	on	screen

@@ -22,7 +22,7 @@
             android:name=".activities.CheckoutActivity"
             android:label="@string/app_name">
         </activity><activity
-            android:name=".activities.DetailBookActivity"
+            android:name=".activities.ViewBookActivity"
             android:label="@string/app_name">
         </activity>
     </application>

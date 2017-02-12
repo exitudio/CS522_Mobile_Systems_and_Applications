@@ -9,6 +9,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.stevens.cs522.bookstore.R;
 import edu.stevens.cs522.bookstore.entities.Author;
 import edu.stevens.cs522.bookstore.entities.Book;
@@ -27,7 +30,7 @@ public class AddBookActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		// TODO provide SEARCH and CANCEL options
+		//provide SEARCH and CANCEL options
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.add_book_menu, menu);
 		return true;
@@ -35,7 +38,6 @@ public class AddBookActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// TODO
 		// SEARCH: return the book details to the BookStore activity
 		// CANCEL: cancel the search request
 		switch (item.getItemId()) {
@@ -55,26 +57,30 @@ public class AddBookActivity extends Activity {
 		/*
 		 * Search for the specified book.
 		 */
-		// TODO Just build a Book object with the search criteria and return that.
 
 		//get string
 		String title = ((EditText) findViewById(R.id.search_title)).getText().toString();
 		String authorName = ((EditText) findViewById(R.id.search_author)).getText().toString();
 		String[] authorNames = authorName.split(" ");
-		Author author;
+		List<Author> authors = new ArrayList<Author>();
 		if(authorNames!=null) {
-			author = new Author(checkNull(authorNames,0), checkNull(authorNames,1), checkNull(authorNames,2) );
+			for( int i=0; i<authorNames.length; i++) {
+				Author author;
+				authors.add(new Author(authorNames[i]) );
+			}
 		}else{
-			author = new Author("-","-","-");
+			authors.add( new Author("-") );
 		}
 		String isbn = ((EditText) findViewById(R.id.search_isbn)).getText().toString();
+		Float price = Float.valueOf(( (EditText) findViewById(R.id.search_price)).getText().toString() );
 
 		//create book object
-		Author[] authors = {author};
-		Book book = new Book(-1,title,authors,isbn,"");
+		Author[] authorArray = new Author[authors.size()];
+		authorArray = (Author[]) authors.toArray(new Author[authors.size()]);
+		Book book = new Book(-1,title, authorArray ,isbn,price);
 		//intent
 		Intent returnIntent = new Intent();
-		returnIntent.putExtra("book", book);
+		returnIntent.putExtra(BOOK_RESULT_KEY, book);
 		setResult(Activity.RESULT_OK, returnIntent);
 		finish();
 		return null;

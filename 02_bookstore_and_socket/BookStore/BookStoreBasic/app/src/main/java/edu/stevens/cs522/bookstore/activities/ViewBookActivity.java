@@ -14,18 +14,25 @@ import edu.stevens.cs522.bookstore.entities.Book;
  * Created by exit on 1/31/17.
  */
 
-public class DetailBookActivity extends Activity {
+public class ViewBookActivity extends Activity {
+    public static final String BOOK_KEY = "book";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.detail_book);
 
-        Book book = getIntent().getExtras().getParcelable("book");
+        Book book = getIntent().getParcelableExtra(BOOK_KEY);
         Log.i("book",book.title);
         ((TextView) findViewById(R.id.detailTitle)).setText(book.title);
-        ((TextView) findViewById(R.id.detailAuthor)).setText(book.getAuthorsToString());
+
+        String authorsName = "";
+        for(int i=0; i<=book.authors.length-1; i++){
+            authorsName += book.authors[i].toString()+" ";
+        }
+        ((TextView) findViewById(R.id.detailAuthor)).setText(authorsName);
         ((TextView) findViewById(R.id.detailIsbn)).setText(book.isbn);
-        ((TextView) findViewById(R.id.detailPrice)).setText(book.price);
+        ((TextView) findViewById(R.id.detailPrice)).setText(book.price.toString());
     }
 
     @Override

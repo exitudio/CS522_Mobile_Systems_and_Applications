@@ -19,10 +19,7 @@ import android.widget.ListView;
 import edu.stevens.cs522.bookstore.R;
 import edu.stevens.cs522.bookstore.adapter.BooksAdapter;
 import edu.stevens.cs522.bookstore.databases.CartDbAdapter;
-import edu.stevens.cs522.bookstore.entities.Author;
 import edu.stevens.cs522.bookstore.entities.Book;
-
-import static android.R.id.list;
 
 public class MainActivity extends ListActivity {
 	
@@ -112,8 +109,8 @@ public class MainActivity extends ListActivity {
         Log.i("menu id:", Integer.toString(item.getItemId()) );
         switch(item.getItemId()){
             case DETAIL_REQUEST:
-                Intent checkOutIntent = new Intent(this, DetailBookActivity.class);
-                checkOutIntent.putExtra("book",book);
+                Intent checkOutIntent = new Intent(this, ViewBookActivity.class);
+                checkOutIntent.putExtra(ViewBookActivity.BOOK_KEY,book);
                 startActivityForResult(checkOutIntent, CHECKOUT_REQUEST);
                 break;
             case DELETE_REQUEST:
@@ -183,9 +180,9 @@ public class MainActivity extends ListActivity {
 		switch (requestCode){
 			case ADD_REQUEST:
 				if(resultCode == Activity.RESULT_OK){
-					Book book = (Book) intent.getParcelableExtra("book");
+					Book book = (Book) intent.getParcelableExtra(AddBookActivity.BOOK_RESULT_KEY);
 					cartDbAdapter.open();
-					cartDbAdapter.insert(book);
+					cartDbAdapter.persist(book);
 					cartDbAdapter.logAllBooks();
 					cartDbAdapter.close();
 					updateView();
