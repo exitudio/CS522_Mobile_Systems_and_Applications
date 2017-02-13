@@ -61,6 +61,7 @@ public class CartDbAdapter {
                             "FOREIGN KEY ("+AuthorContract.BOOK_FK+") REFERENCES "+BOOK_TABLE+"("+BookContract._ID+") ON DELETE CASCADE " +
                     ")"
             );
+            db.execSQL("CREATE INDEX AuthorsBookIndex ON "+AUTHOR_TABLE+"("+AuthorContract.BOOK_FK+")");
 
             Log.i("onCreate","init");
         }
