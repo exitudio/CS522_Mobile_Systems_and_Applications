@@ -74,7 +74,8 @@ public class ChatServer extends Activity implements OnClickListener {
 
     ArrayAdapter arrayAdapter;
     ArrayList<String> messagesList;
-	
+	String username;
+    int port = -1;
 	/*
 	 * Called when the activity is first created. 
 	 */
@@ -97,41 +98,36 @@ public class ChatServer extends Activity implements OnClickListener {
 			PreferenceManager.setDefaultValues(this, R.xml.settings, false);
 		}
 
-        settings = PreferenceManager.getDefaultSharedPreferences(this);
-
-        int port = Integer.valueOf(settings.getString(SettingsActivity.APP_PORT_KEY, getResources().getString(R.string.default_app_port)));
-
-		try {
-			serverSocket = new DatagramSocket(port);
-		} catch (Exception e) {
-			Log.e(TAG, "Cannot open socket", e);
-			return;
-		}
-
         setContentView(R.layout.messages);
 
         // TODO open the database using the database adapter
         messagesDbAdapter = new MessagesDbAdapter(this);
-        messagesDbAdapter.open();
-        messagesDbAdapter.logAll();
-        messagesDbAdapter.fetchAllMessages();
-        messagesDbAdapter.close();
-
-        // TODO query the database using the database adapter, and manage the cursor on the messages thread
-
-        //use SimpleCursorAdapter (deprecated) to display the messages received.
-        messagesList = new ArrayList<String>();
-        messagesList.add("yo");
-        messageListView = (ListView) findViewById(R.id.message_list);
-        arrayAdapter = new ArrayAdapter(this, R.layout.message, messagesList);
-        messageListView.setAdapter(arrayAdapter);
-
 
         //bind the button for "next" to this activity as listener
         next = (Button) findViewById(R.id.next);
         next.setOnClickListener(this);
 
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
+        connectSocket();
+        updateView();
 	}
+
+    private void connectSocket(){
+
+        int currentPortSetting = Integer.valueOf(settings.getString(SettingsActivity.APP_PORT_KEY, getResources().getString(R.string.default_app_port)));
+        if(currentPortSetting != port){
+            port = currentPortSetting;
+            if(serverSocket!=null){
+                serverSocket.close();
+            }
+            try {
+                serverSocket = new DatagramSocket(port);
+            } catch (Exception e) {
+                Log.e(TAG, "Cannot open socket", e);
+                return;
+            }
+        }
+    }
 
     public void onDestroy() {
         super.onDestroy();
@@ -170,31 +166,28 @@ public class ChatServer extends Activity implements OnClickListener {
         return false;
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        Log.i("main","onRestoreInstanceState");
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i("main","onStart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i("main","onResume");
+        connectSocket();
+    }
+
+    @Override
 
     public void onClick(View v) {
-        Log.i("in","yo");
-        /*Message messageTemp = new Message();
-        messageTemp.messageText = "text";
-        messageTemp.timestamp = DateUtils.now();
-        messageTemp.sender = "Sender1";
-
-        Peer senderTemp = new Peer();
-        senderTemp.name = messageTemp.sender;
-        senderTemp.timestamp = messageTemp.timestamp;
-        senderTemp.address = new InetAddress();
-        senderTemp.port = 1234;
-
-        messageTemp.senderId = messagesDbAdapter.persist(senderTemp);
-
-        messagesDbAdapter.open();
-        messagesDbAdapter.persist(messageTemp);
-        messagesDbAdapter.logAll();
-        messagesDbAdapter.close();
-
-        if(true) {
-            return;
-        }*/
 		byte[] receiveData = new byte[1024];
 
 		DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
@@ -211,16 +204,16 @@ public class ChatServer extends Activity implements OnClickListener {
 			InetAddress sourceIPAddress = receivePacket.getAddress();
 			Log.i(TAG, "Source IP Address: " + sourceIPAddress);
 
-
-            String receiveTextTemp = new String(receivePacket.getData(), 0, receivePacket.getLength());
-            receiveTextTemp = "EXIT:"+DateUtils.now().getTime()+":"+receiveTextTemp;
-			String msgContents[] = receiveTextTemp.split(":");
+        username = settings.getString(SettingsActivity.USERNAME_KEY, getResources().getString(R.string.default_user_name));
+//            String receiveTextTemp = new String(receivePacket.getData(), 0, receivePacket.getLength());
+//            receiveTextTemp = username+":"+DateUtils.now().getTime()+":"+receiveTextTemp;
+//			String msgContents[] = receiveTextTemp.split(":");
 //			String msgContents[] = new String(receivePacket.getData(), 0, receivePacket.getLength()).split(":");
 
             Message message = new Message();
-            message.sender = msgContents[0];
-            message.timestamp = new Date(Long.parseLong(msgContents[1]));
-            message.messageText = msgContents[2];
+            message.sender = username;
+            message.timestamp = DateUtils.now(); //new Date(Long.parseLong(msgContents[1]));
+            message.messageText = new String(receivePacket.getData(), 0, receivePacket.getLength());
 
 			Log.i(TAG, "Received from " + message.sender + ": " + message.messageText);
 
@@ -233,42 +226,23 @@ public class ChatServer extends Activity implements OnClickListener {
             messagesDbAdapter.open();
             message.senderId = messagesDbAdapter.persist(sender);
             messagesDbAdapter.persist(message);
-            messagesDbAdapter.logAll();
             messagesDbAdapter.close();
 
 //            messagesAdapter.notifyDataSetChanged();
-            arrayAdapter.notifyDataSetChanged();
-
-
+        updateView();
 	}
 
-    public void onClickOld(View v) {
+    private void updateView(){
+        // TODO query the database using the database adapter, and manage the cursor on the messages thread
+        messagesDbAdapter.open();
+        messagesDbAdapter.logAll();
+        messagesList = messagesDbAdapter.fetchAllMessages();
+        messagesDbAdapter.close();
 
-        byte[] receiveData = new byte[1024];
-
-        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-
-        try {
-            Log.i(TAG,serverSocket.getLocalAddress().getHostAddress());
-            serverSocket.receive(receivePacket);
-            Log.i(TAG, "Received a packet");
-
-            InetAddress sourceIPAddress = receivePacket.getAddress();
-            Log.i(TAG, "Source IP Address: " + sourceIPAddress);
-
-			/*
-			 * TODO: Extract sender and receiver from message and display.
-			 */
-            String receiveText = new String(receiveData, 0, receivePacket.getLength());
-            Log.i(TAG,"receiveText:"+receiveText);
-            arrayAdapter.add(receiveText);
-
-        } catch (Exception e) {
-
-            Log.e(TAG, "Problems receiving packet: " + e.getMessage());
-            socketOK = false;
-        }
-
+        //use SimpleCursorAdapter (deprecated) to display the messages received.
+        messageListView = (ListView) findViewById(R.id.message_list);
+        arrayAdapter = new ArrayAdapter(this, R.layout.message, messagesList);
+        messageListView.setAdapter(arrayAdapter);
     }
 
 	/*

@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import edu.stevens.cs522.chatserver.contracts.MessageContract;
 import edu.stevens.cs522.chatserver.contracts.PeerContract;
 import edu.stevens.cs522.chatserver.entities.Message;
@@ -25,7 +27,7 @@ public class MessagesDbAdapter {
 
     private static final String PEER_TABLE = "view_peers";
 
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 10;
 
     private DatabaseHelper dbHelper;
 
@@ -59,20 +61,23 @@ public class MessagesDbAdapter {
                             PeerContract.ADDRESS+" TEXT, "+
                             PeerContract.PORT+" INTEGER)"
             );
-
+            db.execSQL("CREATE INDEX AuthorsBookIndex ON "+MESSAGE_TABLE+"("+MessageContract.SENDER_ID+")");
             Log.i("onCreate DB","created");
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.i("DB","onUpgrade");
             db.execSQL("DROP TABLE IF EXISTS "+MESSAGE_TABLE);
             db.execSQL("DROP TABLE IF EXISTS "+PEER_TABLE);
+            onCreate(db);
         }
     }
 
 
     public MessagesDbAdapter(Context _context) {
         dbHelper = new DatabaseHelper(_context, DATABASE_NAME, null, DATABASE_VERSION);
+        dbHelper.getWritableDatabase();
     }
 
     public void open() throws SQLException {
@@ -93,22 +98,43 @@ public class MessagesDbAdapter {
             do{
                 Peer peer = new Peer(cursorPeer);
                 Log.i("***** PEER ****","id:"+peer.id+", name:"+peer.name+", timestamp:"+peer.timestamp+", address:"+peer.address+", port:"+peer.port);
-            }while(cursorMessage.moveToNext());
+            }while(cursorPeer.moveToNext());
         }
     }
 
-    public Cursor fetchAllMessages() {
-        // TODO
-        return null;
+    public ArrayList<String> fetchAllMessages() {
+        ArrayList<String> messagesString = new ArrayList<String>();
+        Cursor cursorMessage = db.rawQuery("SELECT * FROM "+MESSAGE_TABLE,null);
+        if(cursorMessage.moveToFirst()){
+            do{
+                Message message = new Message(cursorMessage);
+                messagesString.add(message.sender+":"+message.timestamp+":"+message.messageText);
+                //Log.i("***** MESSAGE ****","id:"+message.id+", messageText:"+message.messageText+", timestamp:"+message.timestamp+", sender:"+message.sender+", senderId:"+message.senderId);
+            }while(cursorMessage.moveToNext());
+        }
+        return messagesString;
     }
 
-    public Cursor fetchAllPeers() {
-        // TODO
-        return null;
+    public ArrayList<Peer> fetchAllPeers() {
+        ArrayList<Peer> peers = new ArrayList<Peer>();
+        Cursor cursorPeer = db.rawQuery("SELECT * FROM "+PEER_TABLE,null);
+        if(cursorPeer.moveToFirst()){
+            do{
+                Peer peer = new Peer(cursorPeer);
+                peers.add(peer);
+//                Log.i("***** PEER ****","id:"+peer.id+", name:"+peer.name+", timestamp:"+peer.timestamp+", address:"+peer.address+", port:"+peer.port);
+            }while(cursorPeer.moveToNext());
+        }
+        return peers;
     }
 
     public Peer fetchPeer(long peerId) {
-        // TODO
+        Cursor cursorPeer = db.rawQuery("SELECT * FROM "+PEER_TABLE+" WHERE "+PeerContract._ID+" = ?", new String[]{Long.toString(peerId)});
+        if(cursorPeer.moveToFirst()){
+            Peer peer = new Peer(cursorPeer);
+            Log.i("fetchPeer",peer.name+":"+peer.port);
+            return peer;
+        }
         return null;
     }
 
@@ -132,7 +158,22 @@ public class MessagesDbAdapter {
     public long persist(Peer peer) throws SQLException {
         ContentValues peerCv=new ContentValues();
         peer.writeToProvider(peerCv);
-        long peerId = db.insert(PEER_TABLE, null, peerCv);
+
+        long peerId;
+        String sql = "SELECT * FROM "+PEER_TABLE+" WHERE "+PeerContract.NAME+" = ?";
+        Cursor cursor = db.rawQuery(sql, new String[]{peer.name});
+        if (cursor == null || !cursor.moveToFirst()) {
+            //Insert new
+            peerId = db.insert(PEER_TABLE, null, peerCv);
+        } else {
+            //Update
+            String clause = PeerContract.NAME+" = ? ";
+            String args[] = {peer.name};
+            peerId = db.update(PEER_TABLE, peerCv,clause,args);
+        }
+
+
+
         if(peerId<0) {
             throw new SQLException("Failed to add peer " + peer.name);
         }

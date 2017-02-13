@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <EditTextPreference
+        android:id="@+id/username_edit"
         android:key="username"
         android:title="@string/user_name"
         android:summary="@string/user_name_summary"
         android:defaultValue="@string/default_user_name" />
     <EditTextPreference
+        android:id="@+id/port_edit"
         android:key="app_port"
         android:title="@string/app_port"
         android:summary="@string/app_port_summary"

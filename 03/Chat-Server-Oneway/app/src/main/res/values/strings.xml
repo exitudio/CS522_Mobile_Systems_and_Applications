@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Chat Server (Basic)</string>
+    <string name="app_name">Chat Server Ekkasit Pinyoanuntapong </string>
     <string name="user_name">Username</string>
     <string name="user_name_summary">Name by which user is identified in chat messages</string>
-    <string name="app_port">6666</string>
+    <string name="app_port">Port</string>
     <string name="app_port_summary">Port that is used on this device for sending or receiving chat messages</string>
 
     <!-- String literals in the UI -->
