@@ -8,6 +8,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import edu.stevens.cs522.bookstore.R;
+import edu.stevens.cs522.bookstore.databases.CartDbAdapter;
 import edu.stevens.cs522.bookstore.entities.Book;
 
 /**
@@ -22,8 +23,16 @@ public class ViewBookActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.detail_book);
 
+
         Book book = getIntent().getParcelableExtra(BOOK_KEY);
-        Log.i("book",book.title);
+
+        CartDbAdapter cartDbAdapter = new CartDbAdapter(this);
+        cartDbAdapter.open();
+        //It doesn't have to query again but because of the assignment required.
+        book = cartDbAdapter.fetchBook(book.id);
+        cartDbAdapter.close();
+        Log.i("bookTemp",book.title);
+
         ((TextView) findViewById(R.id.detailTitle)).setText(book.title);
 
         String authorsName = "";

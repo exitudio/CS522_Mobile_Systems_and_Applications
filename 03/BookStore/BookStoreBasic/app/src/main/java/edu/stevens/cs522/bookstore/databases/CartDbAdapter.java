@@ -34,7 +34,7 @@ public class CartDbAdapter {
 
     public static class DatabaseHelper extends SQLiteOpenHelper {
 
-        private static final String DATABASE_CREATE = null; // TODO
+        private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS ";
 
         public DatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
             super(context, name, factory, version);
@@ -44,7 +44,7 @@ public class CartDbAdapter {
         public void onCreate(SQLiteDatabase db) {
             // TODO
             db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS " +BOOK_TABLE+
+                    DATABASE_CREATE+BOOK_TABLE+
                     " ("+ BookContract._ID+" INTEGER PRIMARY KEY, "+
                             BookContract.TITLE+" TEXT, "+
                             BookContract.AUTHORS+" TEXT, "+
@@ -52,7 +52,7 @@ public class CartDbAdapter {
                             BookContract.PRICE+" REAL)"
             );
             db.execSQL(
-                    "CREATE TABLE IF NOT EXISTS " +AUTHOR_TABLE+
+                    DATABASE_CREATE+AUTHOR_TABLE+
                     "("+BookContract._ID+" INTEGER PRIMARY KEY, " +
                             AuthorContract.FIRST_NAME+" TEXT, " +
                             AuthorContract.MIDDLE_INITIAL+" TEXT, " +
@@ -134,6 +134,9 @@ public class CartDbAdapter {
 
     public void open() throws SQLException {
         db = dbHelper.getWritableDatabase();
+        if(db==null){
+            throw new SQLException("Failed to open database ");
+        }
         db.execSQL("PRAGMA	foreign_keys=ON;");
     }
 
@@ -196,19 +199,6 @@ public class CartDbAdapter {
 
     public ArrayList<Book> fetchAllBooks(){
         ArrayList<Book> books = new ArrayList<Book>();
-        /*Cursor cursor = db.query(BOOK_TABLE,
-                new String[]{BookContract._ID, BookContract.TITLE, BookContract.ISBN, BookContract.PRICE, BookContract.AUTHORS},
-                null, null, null, null, null);
-
-        if( cursor.moveToFirst()){
-            do{
-                Book book = new Book(cursor);
-                books.add(book);
-                Log.i("add"," title:"+book.title+", isbn:"+book.isbn+", price:"+book.price);
-            }while (cursor.moveToNext());
-        }*/
-
-
 
         //ALL QUERY
         Cursor cursorQueryAll = db.rawQuery("SELECT "+BOOK_TABLE+"."+BookContract._ID+" ,"+BookContract.TITLE+" ,"+BookContract.PRICE+" ,"+BookContract.ISBN+", "+
@@ -235,13 +225,33 @@ public class CartDbAdapter {
         return books;
     }
 
+    // since SimpleCursorAdapter is deprecated so I create my own adapter
+    // and return ArrayList<Books> instead
     /*public Cursor fetchAllBooks() {
-        // TODO
         return null;
     }*/
 
     public Book fetchBook(long rowId) {
-        // TODO
+        Cursor cursor = db.rawQuery("SELECT "+BOOK_TABLE+"."+BookContract._ID+" ,"+BookContract.TITLE+" ,"+BookContract.PRICE+" ,"+BookContract.ISBN+", "+
+                        "GROUP_CONCAT("+AuthorContract.LAST_NAME+",'|') as "+BookContract.AUTHORS+" "+
+                        "FROM "+BOOK_TABLE+" JOIN "+AUTHOR_TABLE+" "+
+                        "ON "+BOOK_TABLE+"."+BookContract._ID+" = "+AUTHOR_TABLE+"."+AuthorContract.BOOK_FK+" "+
+                        "WHERE "+BOOK_TABLE+"."+BookContract._ID+" = "+rowId+" "+
+                        "GROUP BY "+BOOK_TABLE+"."+BookContract._ID+" ,"+BookContract.TITLE+" ,"+BookContract.PRICE+" ,"+BookContract.ISBN
+
+                ,null);
+
+        if( cursor.moveToFirst()){
+            Book book = new Book(cursor);
+            Log.i("****** ALL query",
+                    BookContract._ID+" : "+book.id+", "+
+                            BookContract.TITLE+" : "+book.title+", "+
+                            BookContract.PRICE+" : "+book.price+", "+
+                            BookContract.ISBN+" : "+book.isbn+", "+
+                            BookContract.AUTHORS+" : "+book.getFirstAuthor()
+            );
+            return book;
+        }
         return null;
     }
 
@@ -256,8 +266,10 @@ public class CartDbAdapter {
             long authorId = db.insert(AUTHOR_TABLE, null, authorCv );
         }
         //cannot insert
-        if(bookId!=-1) {
+        if(bookId>-1) {
             book.id = bookId;
+        }else{
+            throw new SQLException("Failed to open database ");
         }
     }
 

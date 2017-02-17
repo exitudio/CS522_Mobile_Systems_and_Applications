@@ -139,7 +139,7 @@ public class MessagesDbAdapter {
     }
 
     public Cursor fetchMessagesFromPeer(Peer peer) {
-        // TODO
+        //not necessary
         return null;
     }
 

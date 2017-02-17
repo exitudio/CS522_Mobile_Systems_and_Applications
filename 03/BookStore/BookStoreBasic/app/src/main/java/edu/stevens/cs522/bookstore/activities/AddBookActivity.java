@@ -72,7 +72,13 @@ public class AddBookActivity extends Activity {
 			authors.add( new Author("-") );
 		}
 		String isbn = ((EditText) findViewById(R.id.search_isbn)).getText().toString();
-		Float price = Float.valueOf(( (EditText) findViewById(R.id.search_price)).getText().toString() );
+		String priceStr = ((EditText) findViewById(R.id.search_price)).getText().toString();
+		Float price;
+		if(priceStr+""!="") {
+			price = Float.valueOf(priceStr);
+		}else{
+			price = Float.valueOf(0);
+		}
 
 		//create book object
 		Author[] authorArray = new Author[authors.size()];

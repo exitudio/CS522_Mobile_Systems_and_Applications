@@ -50,17 +50,11 @@ public class MainActivity extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		cartDbAdapter = new CartDbAdapter(this);
-		cartDbAdapter.open();
-		shoppingCart = cartDbAdapter.fetchAllBooks();
-		cartDbAdapter.logAllBooks();
-		cartDbAdapter.close();
 
-		// TODO Set the layout (use cart.xml layout)
+
+		// Set the layout (use cart.xml layout)
 		setContentView(R.layout.cart);
-
-		// TODO use an array adapter to display the cart contents.
-		booksAdapter = new BooksAdapter(this,shoppingCart);
-		setListAdapter(booksAdapter);
+		updateView();
 //		getListView().setAdapter(booksAdapter);//do the samething
 
 		//context menu
@@ -207,6 +201,7 @@ public class MainActivity extends ListActivity {
 		cartDbAdapter.logAllBooks();
 		cartDbAdapter.close();
 
+		// since SimpleCursorAdapter is deprecated so I create my own custom adapter
 		booksAdapter = new BooksAdapter(this,shoppingCart);
 		setListAdapter(booksAdapter);
 	}
