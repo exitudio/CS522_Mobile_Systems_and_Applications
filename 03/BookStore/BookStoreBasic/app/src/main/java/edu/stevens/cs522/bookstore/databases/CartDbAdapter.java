@@ -197,7 +197,17 @@ public class CartDbAdapter {
 
     }
 
-    public ArrayList<Book> fetchAllBooks(){
+    public Cursor fetchAllBooks(){
+        Cursor cursor = db.rawQuery("SELECT "+BOOK_TABLE+"."+BookContract._ID+" ,"+BookContract.TITLE+" ,"+BookContract.PRICE+" ,"+BookContract.ISBN+", "+
+                        "GROUP_CONCAT("+AuthorContract.LAST_NAME+",'|') as "+BookContract.AUTHORS+" "+
+                        "FROM "+BOOK_TABLE+" JOIN "+AUTHOR_TABLE+" "+
+                        "ON "+BOOK_TABLE+"."+BookContract._ID+" = "+AUTHOR_TABLE+"."+AuthorContract.BOOK_FK+" "+
+                        "GROUP BY "+BOOK_TABLE+"."+BookContract._ID+" ,"+BookContract.TITLE+" ,"+BookContract.PRICE+" ,"+BookContract.ISBN
+                ,null);
+        return cursor;
+    }
+
+    public ArrayList<Book> fetchAllBooksArrayList(){
         ArrayList<Book> books = new ArrayList<Book>();
 
         //ALL QUERY

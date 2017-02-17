@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -15,9 +16,10 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 import edu.stevens.cs522.bookstore.R;
-import edu.stevens.cs522.bookstore.adapter.BooksAdapter;
+import edu.stevens.cs522.bookstore.contracts.BookContract;
 import edu.stevens.cs522.bookstore.databases.CartDbAdapter;
 import edu.stevens.cs522.bookstore.entities.Book;
 
@@ -40,11 +42,15 @@ public class MainActivity extends ListActivity {
 
 	// There is a reason this must be an ArrayList instead of a List.
 	@SuppressWarnings("unused")
-	private ArrayList<Book> shoppingCart;
-	private ArrayAdapter<Book> booksAdapter;
+//	private ArrayList<Book> shoppingCart;
+//	private ArrayAdapter<Book> booksAdapter;
 
 	//DB
 	CartDbAdapter cartDbAdapter;
+
+
+	private ListView listView;
+	SimpleCursorAdapter cursorAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -54,30 +60,23 @@ public class MainActivity extends ListActivity {
 
 		// Set the layout (use cart.xml layout)
 		setContentView(R.layout.cart);
-		updateView();
+
 //		getListView().setAdapter(booksAdapter);//do the samething
 
 		//context menu
-		final ListView listView = getListView();
+		listView = getListView();
 		//final ListView listView = (ListView) findViewById(android.R.id.list); // the samething
 		registerForContextMenu(listView);
+
+
+		updateView();
+
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 				openContextMenu(view);
 			}
 		});
-
-		CartDbAdapter cartDbAdapter = new CartDbAdapter(this);
-
-		//mockup book
-//		Author[] authors = {new Author("a","b","c")};
-//		Book book = new Book(1,"Title 1",authors,"isbn...","Price...");
-//		Book book2 = new Book(1,"Title 2",authors,"isbn...","Price...");
-//		Book book3 = new Book(1,"Title 3",authors,"isbn...","Price...");
-//		booksAdapter.add(book);
-//		booksAdapter.add(book2);
-//		booksAdapter.add(book3);
 	}
 
 	@Override
@@ -97,9 +96,14 @@ public class MainActivity extends ListActivity {
 			Log.e(TAG, "bad menuInfo", e);
 			return false;
 		}
-		int id = (int) getListAdapter().getItemId(menuInfo.position);
-        Book book = booksAdapter.getItem(id);
-        Log.i("ClICK list id",""+id+","+book.id);
+//		int id = (int) getListAdapter().getItemId(menuInfo.position);
+//        Book book = booksAdapter.getItem(id);
+		Cursor cursor = cursorAdapter.getCursor();
+		cursor.moveToPosition(menuInfo.position);
+		Book book = new Book(cursor);
+
+
+//        Log.i("ClICK list id",""+id+","+book.id);
         Log.i("menu id:", Integer.toString(item.getItemId()) );
         switch(item.getItemId()){
             case DETAIL_REQUEST:
@@ -197,13 +201,24 @@ public class MainActivity extends ListActivity {
 
 	private void updateView(){
 		cartDbAdapter.open();
-		shoppingCart = cartDbAdapter.fetchAllBooks();
+		//shoppingCart = cartDbAdapter.fetchAllBooks();
+
+
+		Cursor cursor = cartDbAdapter.fetchAllBooks();
+		String[] from =	new	String[] { BookContract.TITLE,
+				BookContract.AUTHORS };
+		int[] to = new	int[] { android.R.id.text1,
+				android.R.id.text2 };
+		cursorAdapter = new SimpleCursorAdapter(this,android.R.layout.simple_list_item_2,cursor,from,to);
+		listView.setAdapter(cursorAdapter);
+
+
 		cartDbAdapter.logAllBooks();
 		cartDbAdapter.close();
 
 		// since SimpleCursorAdapter is deprecated so I create my own custom adapter
-		booksAdapter = new BooksAdapter(this,shoppingCart);
-		setListAdapter(booksAdapter);
+//		booksAdapter = new BooksAdapter(this,shoppingCart);
+//		setListAdapter(booksAdapter);
 	}
 
 }
