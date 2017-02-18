@@ -11,8 +11,8 @@ import android.provider.BaseColumns;
 public class AuthorContract implements BaseColumns {
 
     public static final String ID = _ID;
-
     public static final String NAME = "name";
+    public static final String BOOK_FK = "book_fk";
 
     /*
      * NAME column

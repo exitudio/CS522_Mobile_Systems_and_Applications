@@ -1,8 +1,10 @@
 package edu.stevens.cs522.bookstore.activities;
 
 import android.app.Activity;
+import android.app.LoaderManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,7 +37,6 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 	static final private int CHECKOUT_REQUEST = ADD_REQUEST + 1;
 
     private BookManager bookManager;
-
     private BookAdapter bookAdapter;
 
 	@Override
@@ -58,13 +59,16 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         // Initialize the book manager and query for all books
         bookManager = new BookManager(this);
         bookManager.getAllBooksAsync(this);
+
+
     }
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		// TODO inflate a menu with ADD and CHECKOUT options
-
+        Log.i(TAG,"onCreateOptionMenu");
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.bookstore_menu, menu);
 
         return true;
 	}
@@ -73,20 +77,17 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
 	public boolean onOptionsItemSelected(MenuItem item) {
 		super.onOptionsItemSelected(item);
         switch(item.getItemId()) {
-
-            // TODO ADD provide the UI for adding a book
             case R.id.add:
-                // Intent addIntent = new Intent(this, AddBookActivity.class);
-                // startActivityForResult(addIntent, ADD_REQUEST);
-                break;
-
-            // TODO CHECKOUT provide the UI for checking out
+                Intent addIntent = new Intent(this, AddBookActivity.class);
+                startActivityForResult(addIntent, ADD_REQUEST);
+                return true;
             case R.id.checkout:
-                break;
-
+                Intent checkoutIntent = new Intent(this, CheckoutActivity.class);
+                startActivityForResult(checkoutIntent, CHECKOUT_REQUEST);
+                return true;
             default:
+                return super.onOptionsItemSelected(item);
         }
-        return false;
     }
 
 	@Override

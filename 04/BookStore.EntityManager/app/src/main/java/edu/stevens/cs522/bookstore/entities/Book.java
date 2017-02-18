@@ -9,17 +9,37 @@ public class Book {
 	// TODO Modify this to implement the Parcelable interface.
 
 	public long id;
-	
 	public String title;
-	
 	public Author[] authors;
-	
 	public String isbn;
-	
-	public String price;
+	public Float price;
 
     public Book() {
     }
+
+	public Book(Cursor cursor) {
+		// TODO init from cursor
+	}
+
+	protected Book(Parcel in) {
+		this.id = in.readLong();
+		this.title = in.readString();
+		this.authors = in.createTypedArray(Author.CREATOR);
+		this.isbn = in.readString();
+		this.price = in.readFloat();
+	}
+
+	public Book(int id, String title, Author[] author, String isbn, Float price) {
+		this.id = id;
+		this.title = title;
+		this.authors = author;
+		this.isbn = isbn;
+		this.price = price;
+	}
+
+	public void writeToParcel(Parcel out) {
+		// TODO save state to parcel
+	}
 
 	public String getFirstAuthor() {
 		if (authors != null && authors.length > 0) {
@@ -27,18 +47,6 @@ public class Book {
 		} else {
 			return "";
 		}
-	}
-
-	public Book(Parcel in) {
-		// TODO init from parcel
-	}
-
-	public void writeToParcel(Parcel out) {
-		// TODO save state to parcel
-	}
-
-	public Book(Cursor cursor) {
-		// TODO init from cursor
 	}
 
 	public void writeToProvider(ContentValues out) {

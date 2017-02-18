@@ -162,7 +162,7 @@ public class CartDbAdapter {
                 );
             }while (cursorQueryAll.moveToNext());
         }
-        if(true) {
+        /*if(true) {
             return;
         }
         // BOOK QUERY
@@ -192,7 +192,7 @@ public class CartDbAdapter {
                 Author author = new Author(cursorAuthor);
                 Log.i("****** AUTHOR TABLE **","first:"+author.firstName+", mid:"+author.middleInitial+", last:"+author.lastName+" bookFk:"+author.bookFk);
             }while (cursorAuthor.moveToNext());
-        }
+        }*/
 
 
     }

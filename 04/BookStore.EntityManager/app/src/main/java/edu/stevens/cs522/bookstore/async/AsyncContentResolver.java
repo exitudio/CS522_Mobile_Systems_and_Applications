@@ -24,6 +24,7 @@ public class AsyncContentResolver extends AsyncQueryHandler {
 
     @Override
     public void onInsertComplete(int token, Object cookie, Uri uri) {
+        //slide57
         if (cookie != null) {
             @SuppressWarnings("unchecked")
             IContinue<Uri> callback = (IContinue<Uri>) cookie;
@@ -40,6 +41,11 @@ public class AsyncContentResolver extends AsyncQueryHandler {
     protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
         super.onQueryComplete(token, cookie, cursor);
         // TODO
+        if (cookie != null) {
+            @SuppressWarnings("unchecked")
+            IContinue<Cursor> callback = (IContinue<Cursor>) cookie;
+            callback.kontinue(cursor);
+        }
     }
 
     public void deleteAsync(Uri uri, String select, String[] selectArgs) {
