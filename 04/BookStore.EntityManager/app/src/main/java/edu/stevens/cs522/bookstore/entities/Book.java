@@ -3,8 +3,14 @@ package edu.stevens.cs522.bookstore.entities;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Parcel;
+import android.os.Parcelable;
 
-public class Book {
+import java.util.ArrayList;
+import java.util.List;
+
+import edu.stevens.cs522.bookstore.contracts.BookContract;
+
+public class Book implements Parcelable {
 	
 	// TODO Modify this to implement the Parcelable interface.
 
@@ -18,7 +24,17 @@ public class Book {
     }
 
 	public Book(Cursor cursor) {
-		// TODO init from cursor
+		this.id = BookContract.getId(cursor);
+		this.title = BookContract.getTitle(cursor);
+		List<Author> authorList = new ArrayList<Author>();
+		String[] authorStrings = BookContract.getAuthors(cursor);
+		for( int i=0; i<authorStrings.length; i++){
+			authorList.add( new Author(authorStrings[i]) );
+		}
+		this.authors = authorList.toArray(new Author[authorList.size()]);
+//        this.authors = new Author[]{new Author("f","m","l")};// BookContract.getAuthors(cursor);
+		this.isbn = BookContract.getIsbn(cursor);
+		this.price = BookContract.getPrice(cursor);
 	}
 
 	protected Book(Parcel in) {
@@ -37,8 +53,17 @@ public class Book {
 		this.price = price;
 	}
 
-	public void writeToParcel(Parcel out) {
-		// TODO save state to parcel
+	@Override
+	public int describeContents() {
+		return 0;
+	}
+	@Override
+	public void writeToParcel(Parcel dest, int flags) {
+		dest.writeLong(this.id);
+		dest.writeString(this.title);
+		dest.writeTypedArray(this.authors, flags);
+		dest.writeString(this.isbn);
+		dest.writeFloat(this.price);
 	}
 
 	public String getFirstAuthor() {
@@ -49,8 +74,23 @@ public class Book {
 		}
 	}
 
+	public static final Parcelable.Creator<Book> CREATOR = new Parcelable.Creator<Book>() {
+		@Override
+		public Book createFromParcel(Parcel source) {
+			return new Book(source);
+		}
+
+		@Override
+		public Book[] newArray(int size) {
+			return new Book[size];
+		}
+	};
+
 	public void writeToProvider(ContentValues out) {
-		// TODO write to ContentValues
+		//BookContract.putId(out, id); //no write id when persist
+		BookContract.putTitle(out, title);
+		BookContract.putIsbn(out, isbn);
+		BookContract.putPrice(out, price);
 	}
 
 

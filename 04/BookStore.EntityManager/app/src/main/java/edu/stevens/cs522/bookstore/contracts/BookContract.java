@@ -40,34 +40,43 @@ public class BookContract implements BaseColumns {
     public static final Uri CONTENT_URI(long id) {
         return CONTENT_URI(Long.toString(id));
     }
-
     public static final Uri CONTENT_URI(String id) {
         return withExtendedPath(CONTENT_URI, id);
     }
-
     public static final long getId(Uri uri) {
         return Long.parseLong(uri.getLastPathSegment());
     }
-
     public static final String CONTENT_PATH(Uri uri) {
         return uri.getPath().substring(1);
     }
-
     public static final String CONTENT_PATH = CONTENT_PATH(CONTENT_URI);
-
     public static final String CONTENT_PATH_ITEM = CONTENT_PATH(CONTENT_URI("#"));
 
 
 
     public static final String ID = _ID;
-
     public static final String TITLE = "title";
-
     public static final String AUTHORS = "authors";
-
     public static final String ISBN = "isbn";
-
     public static final String PRICE = "price";
+
+
+    /*
+     * ID column
+     */
+    private static int idColumn = -1;
+
+    public static Long getId(Cursor cursor) {
+        if (idColumn < 0) {
+            idColumn =  cursor.getColumnIndexOrThrow(_ID);;
+        }
+        return cursor.getLong(idColumn);
+    }
+
+    public static void putId(ContentValues values, Long id) {
+        values.put(_ID, id);
+    }
+
 
     /*
      * TITLE column
@@ -108,7 +117,37 @@ public class BookContract implements BaseColumns {
     }
 
 
-    // TODO complete definitions of other getter and setter operations
+    /*
+     * ISBN column
+     */
 
+    private static int isbnColumn = -1;
 
+    public static String getIsbn(Cursor cursor) {
+        if (isbnColumn < 0) {
+            isbnColumn =  cursor.getColumnIndexOrThrow(ISBN);;
+        }
+        return cursor.getString(isbnColumn);
+    }
+
+    public static void putIsbn(ContentValues values, String isbn) {
+        values.put(ISBN, isbn);
+    }
+
+    /*
+     * PRICE column
+     */
+
+    private static int priceColumn = -1;
+
+    public static Float getPrice(Cursor cursor) {
+        if (priceColumn < 0) {
+            priceColumn =  cursor.getColumnIndexOrThrow(PRICE);;
+        }
+        return cursor.getFloat(priceColumn);
+    }
+
+    public static void putPrice(ContentValues values, Float price) {
+        values.put(PRICE, price);
+    }
 }

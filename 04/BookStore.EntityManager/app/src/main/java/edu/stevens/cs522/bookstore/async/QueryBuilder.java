@@ -59,7 +59,6 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
             loaderManager.initLoader(loaderId, null, this);
         } else {
             loaderManager.restartLoader(loaderId, null, this);
-
         }
     }
 

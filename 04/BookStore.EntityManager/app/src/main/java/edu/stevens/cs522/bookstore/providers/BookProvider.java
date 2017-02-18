@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -15,8 +16,10 @@ import android.util.Log;
 
 import edu.stevens.cs522.bookstore.contracts.AuthorContract;
 import edu.stevens.cs522.bookstore.contracts.BookContract;
+import edu.stevens.cs522.bookstore.entities.Author;
 import edu.stevens.cs522.bookstore.entities.Book;
 
+import static edu.stevens.cs522.bookstore.contracts.BookContract.AUTHORS;
 import static edu.stevens.cs522.bookstore.contracts.BookContract.CONTENT_PATH;
 import static edu.stevens.cs522.bookstore.contracts.BookContract.CONTENT_PATH_ITEM;
 
@@ -30,7 +33,7 @@ public class BookProvider extends ContentProvider {
 
 
     private static final String DATABASE_NAME = "books.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 4;
     private static final String BOOKS_TABLE = "books";
     private static final String AUTHORS_TABLE = "authors";
 
@@ -85,23 +88,41 @@ public class BookProvider extends ContentProvider {
         // Initialize your content provider on startup.
         dbHelper = new DbHelper(getContext(), DATABASE_NAME, null, DATABASE_VERSION);
 
-        createTestData();
+//        createTestData();
         logAllBooks();
         return true;
     }
 
     private void createTestData(){
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        Book book = new Book(1,"title1",null,"isbn",Float.valueOf(33));
+        Author[] authors = new Author[]{new Author("AuthorName")};
+        Book book = new Book(1,"title1",authors,"isbn",Float.valueOf(33));
+
         ContentValues bookCv=new ContentValues();
         book.writeToProvider(bookCv);
         long bookId = db.insert(BOOKS_TABLE, null, bookCv);
+
+        Log.i("*** persist ***","BookId = "+bookId);
+        for( int i=0; i<book.authors.length; i++) {
+            ContentValues authorCv=new ContentValues();
+            book.authors[i].writeToProvider(authorCv, (int) bookId);
+            long authorId = db.insert(AUTHORS_TABLE, null, authorCv );
+        }
+        //cannot insert
+        if(bookId>-1) {
+            book.id = bookId;
+        }else{
+            throw new SQLException("Failed to open database ");
+        }
+
         db.close();
+
     }
 
     public void logAllBooks() {
-        //ALL QUERY
         SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        //ALL QUERY
         Cursor cursorQueryAll = db.rawQuery("SELECT " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN + ", " +
                         "GROUP_CONCAT(" + AuthorContract.NAME + ",'|') as " + BookContract.AUTHORS + " " +
                         "FROM " + BOOKS_TABLE + " JOIN " + AUTHORS_TABLE + " " +
@@ -121,6 +142,18 @@ public class BookProvider extends ContentProvider {
                                 BookContract.AUTHORS + " : " + book.getFirstAuthor()
                 );
             } while (cursorQueryAll.moveToNext());
+        }
+
+
+        //AUTHOR QUERY
+        Cursor cursorAuthor = db.query(AUTHORS_TABLE,
+                new String[]{AuthorContract.NAME, AuthorContract.BOOK_FK},
+                null, null, null, null, null);
+        if( cursorAuthor.moveToFirst()){
+            do{
+                Author author = new Author(cursorAuthor);
+                Log.i("****** AUTHOR TABLE **","name:"+author.name+" bookFk:"+author.bookFk);
+            }while (cursorAuthor.moveToNext());
         }
     }
 
