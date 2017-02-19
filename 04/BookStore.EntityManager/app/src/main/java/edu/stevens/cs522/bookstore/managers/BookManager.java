@@ -47,9 +47,9 @@ public class BookManager extends Manager<Book> {
 //        QueryBuilder queryBuilder = new QueryBuilder((Activity) context, TEMP_LOADER_ID);
 
         //AsyncQueryHandler
-        Author[] authors = new Author[]{new Author("AuthorName")};
-        Book book = new Book(1,"title2",authors,"isbn2",Float.valueOf(53));
-        persistAsync(book);
+//        Author[] authors = new Author[]{new Author("AuthorName")};
+//        Book book = new Book(1,"title2",authors,"isbn2",Float.valueOf(53));
+//        persistAsync(book);
 
 
     }

@@ -249,14 +249,16 @@ public class BookProvider extends ContentProvider {
                                 "GROUP BY " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN
                         , null);*/
                 if (cursor.moveToFirst()) {
-                    Book book = new Book(cursor);
-                    Log.i(this.getClass().toString(), "query:" +
-                            BookContract._ID + " : " + book.id + ", " +
-                            BookContract.TITLE + " : " + book.title + ", " +
-                            BookContract.PRICE + " : " + book.price + ", " +
-                            BookContract.ISBN + " : " + book.isbn + ", " +
-                            BookContract.AUTHORS + " : " + book.getFirstAuthor()
-                    );
+                    do{
+                        Book book = new Book(cursor);
+                        Log.i("****** BOOK TABLE ****",
+                                BookContract._ID+" : "+book.id+", "+
+                                        BookContract.TITLE+" : "+book.title+", "+
+                                        BookContract.PRICE+" : "+book.price+", "+
+                                        BookContract.ISBN+" : "+book.isbn+", "+
+                                        BookContract.AUTHORS+" : "+book.getFirstAuthor()
+                        );
+                    }while (cursor.moveToNext());
                 }
                 return cursor;
 
@@ -288,15 +290,16 @@ public class BookProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
-        /*switch (uriMatcher.match(uri)) {
+        switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
-                // TODO: Implement this to handle query of all books.
+                int row = db.delete(BOOKS_TABLE,selection,selectionArgs);
+                Log.i(this.getClass().toString(),"Uri delet row:"+row);
+                return row;
             case SINGLE_ROW:
-                // TODO: Implement this to handle query of a specific book.
+                return -1;
             default:
-                throw new IllegalStateException("insert: bad case");
-        }*/
-        throw new UnsupportedOperationException("Not yet implemented");
+                throw new IllegalStateException("delete: bad case");
+        }
     }
 
 }

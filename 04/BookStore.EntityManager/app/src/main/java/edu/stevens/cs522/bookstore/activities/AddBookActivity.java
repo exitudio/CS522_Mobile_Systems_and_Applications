@@ -77,10 +77,10 @@ public class AddBookActivity extends Activity {
 		authorArray = (Author[]) authors.toArray(new Author[authors.size()]);
 		Book book = new Book(-1,title, authorArray ,isbn,price);
 		// TODO intent
-//		Intent returnIntent = new Intent();
-//		returnIntent.putExtra(BOOK_RESULT_KEY, book);
-//		setResult(Activity.RESULT_OK, returnIntent);
-//		finish();
+		Intent returnIntent = new Intent();
+		returnIntent.putExtra(BOOK_RESULT_KEY, book);
+		setResult(Activity.RESULT_OK, returnIntent);
+		finish();
 		return null;
 	}
 

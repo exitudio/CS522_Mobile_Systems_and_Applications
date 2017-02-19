@@ -88,14 +88,16 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
         Log.i(this.getClass().toString(),"onLoadFinished");
 
         if (cursor.moveToFirst()) {
-            Book book = new Book(cursor);
-            Log.i(this.getClass().toString(), "onLoadFinished:" +
-                    BookContract._ID + " : " + book.id + ", " +
-                    BookContract.TITLE + " : " + book.title + ", " +
-                    BookContract.PRICE + " : " + book.price + ", " +
-                    BookContract.ISBN + " : " + book.isbn + ", " +
-                    BookContract.AUTHORS + " : " + book.getFirstAuthor()
-            );
+            do{
+                Book book = new Book(cursor);
+                Log.i(this.getClass().toString(), "onLoadFinished:" +
+                        BookContract._ID + " : " + book.id + ", " +
+                        BookContract.TITLE + " : " + book.title + ", " +
+                        BookContract.PRICE + " : " + book.price + ", " +
+                        BookContract.ISBN + " : " + book.isbn + ", " +
+                        BookContract.AUTHORS + " : " + book.getFirstAuthor()
+                );
+            }while (cursor.moveToNext());
         }
 
 
