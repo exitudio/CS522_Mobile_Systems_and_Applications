@@ -33,7 +33,7 @@ public class BookProvider extends ContentProvider {
 
 
     private static final String DATABASE_NAME = "books.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 7;
     private static final String BOOKS_TABLE = "books";
     private static final String AUTHORS_TABLE = "authors";
 
@@ -132,7 +132,7 @@ public class BookProvider extends ContentProvider {
 
         if (cursorQueryAll.moveToFirst()) {
             do {
-                Log.i("db", TextUtils.join(",", cursorQueryAll.getColumnNames()));
+//                Log.i("db", TextUtils.join(",", cursorQueryAll.getColumnNames()));
                 Book book = new Book(cursorQueryAll);
                 Log.i("****** ALL query",
                         BookContract._ID + " : " + book.id + ", " +
@@ -142,6 +142,25 @@ public class BookProvider extends ContentProvider {
                                 BookContract.AUTHORS + " : " + book.getFirstAuthor()
                 );
             } while (cursorQueryAll.moveToNext());
+        }
+
+
+        // BOOK QUERY
+        Cursor cursor = db.query(BOOKS_TABLE,
+                new String[]{BookContract._ID, BookContract.TITLE, BookContract.PRICE, BookContract.ISBN, BookContract.AUTHORS},
+                null, null, null, null, null);
+
+        if( cursor.moveToFirst()){
+            do{
+                Book book = new Book(cursor);
+                Log.i("****** BOOK TABLE ****",
+                        BookContract._ID+" : "+book.id+", "+
+                                BookContract.TITLE+" : "+book.title+", "+
+                                BookContract.PRICE+" : "+book.price+", "+
+                                BookContract.ISBN+" : "+book.isbn+", "+
+                                BookContract.AUTHORS+" : "+book.getFirstAuthor()
+                );
+            }while (cursor.moveToNext());
         }
 
 
@@ -155,6 +174,7 @@ public class BookProvider extends ContentProvider {
                 Log.i("****** AUTHOR TABLE **","name:"+author.name+" bookFk:"+author.bookFk);
             }while (cursorAuthor.moveToNext());
         }
+        db.close();
     }
 
     // Used to dispatch operation based on URI
@@ -183,21 +203,24 @@ public class BookProvider extends ContentProvider {
 
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        Log.i(this.getClass().toString(),"Uri insert :"+uri);
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
                 // TODO: Implement this to handle requests to insert a new row.
                 // Make sure to notify any observers
 
-                /*long row = db.insert(BOOKS_TABLE,null,values);
+                //slide 19
+                long row = db.insert(BOOKS_TABLE,null,values);
+                Log.i(this.getClass().toString(),"Uri insert row:"+row);
                 if(row>0){
                     Uri instanceUri = BookContract.CONTENT_URI(row);
                     ContentResolver cr = getContext().getContentResolver();
                     cr.notifyChange(instanceUri,null);
                     return instanceUri;
-                }*/
+                }
 
-                throw new UnsupportedOperationException("Not yet implemented");
+                throw new SQLException("Insertion failed");
             case SINGLE_ROW:
                 throw new IllegalArgumentException("insert expects a whole-table URI");
             default:
@@ -206,13 +229,38 @@ public class BookProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
-                        String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Log.i(this.getClass().toString(),"[query] uri:"+uri+", projection:"+projection+", selection:"+selection+", selectionArgs:"+selectionArgs+", sortOrder:"+sortOrder);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
                 // TODO: Implement this to handle query of all books.
-                return db.query(BOOKS_TABLE, projection, selection, selectionArgs, null, null, sortOrder);
+                Cursor cursor = db.query(BOOKS_TABLE,
+                        new String[]{BookContract._ID, BookContract.TITLE, BookContract.PRICE, BookContract.ISBN, BookContract.AUTHORS},
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder);
+                /*Cursor cursor = db.rawQuery("SELECT " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN + ", " +
+                                "GROUP_CONCAT(" + AuthorContract.NAME + ",'|') as " + BookContract.AUTHORS + " " +
+                                "FROM " + BOOKS_TABLE + " JOIN " + AUTHORS_TABLE + " " +
+                                "ON " + BOOKS_TABLE + "." + BookContract._ID + " = " + AUTHORS_TABLE + "." + AuthorContract.BOOK_FK + " " +
+                                "GROUP BY " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN
+                        , null);*/
+                if (cursor.moveToFirst()) {
+                    Book book = new Book(cursor);
+                    Log.i(this.getClass().toString(), "query:" +
+                            BookContract._ID + " : " + book.id + ", " +
+                            BookContract.TITLE + " : " + book.title + ", " +
+                            BookContract.PRICE + " : " + book.price + ", " +
+                            BookContract.ISBN + " : " + book.isbn + ", " +
+                            BookContract.AUTHORS + " : " + book.getFirstAuthor()
+                    );
+                }
+                return cursor;
+
+
             case SINGLE_ROW:
                 // TODO: Implement this to handle query of a specific book.
                 // String selection = BookContract._ID+"=?";

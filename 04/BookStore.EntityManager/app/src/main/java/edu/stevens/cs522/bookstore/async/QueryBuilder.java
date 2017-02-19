@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 
 import edu.stevens.cs522.bookstore.contracts.BookContract;
+import edu.stevens.cs522.bookstore.entities.Book;
 import edu.stevens.cs522.bookstore.managers.BookManager;
 import edu.stevens.cs522.bookstore.managers.TypedCursor;
 import edu.stevens.cs522.bookstore.providers.BookProvider;
@@ -49,7 +50,7 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
         this.listener = listener;
     }
 
-    // I create
+    // I create [ not use]
     private Activity activity;
     public QueryBuilder(Activity activity, int loaderId){
         this.activity = activity;
@@ -85,6 +86,19 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
     @Override
     public void onLoadFinished(Loader<Cursor> loaders, Cursor cursor) {
         Log.i(this.getClass().toString(),"onLoadFinished");
+
+        if (cursor.moveToFirst()) {
+            Book book = new Book(cursor);
+            Log.i(this.getClass().toString(), "onLoadFinished:" +
+                    BookContract._ID + " : " + book.id + ", " +
+                    BookContract.TITLE + " : " + book.title + ", " +
+                    BookContract.PRICE + " : " + book.price + ", " +
+                    BookContract.ISBN + " : " + book.isbn + ", " +
+                    BookContract.AUTHORS + " : " + book.getFirstAuthor()
+            );
+        }
+
+
         //slide75
         if (loaders.getId() == BookManager.TEMP_LOADER_ID) {
             listener.handleResults(new TypedCursor<T>(cursor, creator));
@@ -95,6 +109,10 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-
+        if (loader.getId() == loaderID) {
+            listener.closeResults();
+        }else{
+            throw new IllegalStateException("Unexpected loader callback");
+        }
     }
 }

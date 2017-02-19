@@ -17,6 +17,7 @@ import edu.stevens.cs522.bookstore.async.QueryBuilder;
 import edu.stevens.cs522.bookstore.async.QueryBuilder.IQueryListener;
 import edu.stevens.cs522.bookstore.contracts.AuthorContract;
 import edu.stevens.cs522.bookstore.contracts.BookContract;
+import edu.stevens.cs522.bookstore.entities.Author;
 import edu.stevens.cs522.bookstore.entities.Book;
 import edu.stevens.cs522.bookstore.providers.BookProvider;
 
@@ -27,7 +28,6 @@ import edu.stevens.cs522.bookstore.providers.BookProvider;
 public class BookManager extends Manager<Book> {
 
     public static final int TEMP_LOADER_ID = 10;
-
     private static final int LOADER_ID = 1;
 
     private static final IEntityCreator<Book> creator = new IEntityCreator<Book>() {
@@ -39,38 +39,37 @@ public class BookManager extends Manager<Book> {
 
     private AsyncContentResolver contentResolver;
 
-    public BookManager(Context context) {
+    public BookManager(Activity context) {
         super(context, creator, LOADER_ID);
         contentResolver = new AsyncContentResolver(context.getContentResolver());
 
         Log.i("BookManager","init");
 //        QueryBuilder queryBuilder = new QueryBuilder((Activity) context, TEMP_LOADER_ID);
-        QueryBuilder.executeQuery(
-                "test",
-                (Activity)context,
-                BookContract.CONTENT_URI, TEMP_LOADER_ID,
-                new IEntityCreator<Book>() {
-                    @Override
-                    public Book create(Cursor cursor) {
-                        return null;
-                    }
-                },
-                new IQueryListener<Book>() {
-                    @Override
-                    public void closeResults() {
 
-                    }
+        //AsyncQueryHandler
+        Author[] authors = new Author[]{new Author("AuthorName")};
+        Book book = new Book(1,"title2",authors,"isbn2",Float.valueOf(53));
+        persistAsync(book);
 
-                    public void handleResults(TypedCursor<Book> books) {
-                        if (books.moveToFirst()) {
 
-                        }
-                    }
-                });
     }
 
     public void getAllBooksAsync(IQueryListener<Book> listener) {
         // TODO use QueryBuilder to complete this
+        // LoaderManager
+        QueryBuilder.executeQuery(
+                tag,
+                context,
+                BookContract.CONTENT_URI, TEMP_LOADER_ID,
+                new IEntityCreator<Book>() {
+                    @Override
+                    public Book create(Cursor cursor) {
+                        Log.i(this.getClass().toString(), "IEntity");
+                        return null;
+                    }
+                },
+                listener
+                );
     }
 
     public void getBookAsync(long id, IContinue<Book> callback) {
@@ -84,6 +83,7 @@ public class BookManager extends Manager<Book> {
         getAsyncResolver().insertAsync(BookContract.CONTENT_URI, values,
                 new IContinue<Uri>() {
                     public void kontinue(Uri uri) {
+                        Log.i(this.getClass().toString(),"kontinue:"+uri);
                         book.id = BookContract.getId(uri);
                     }
                 });

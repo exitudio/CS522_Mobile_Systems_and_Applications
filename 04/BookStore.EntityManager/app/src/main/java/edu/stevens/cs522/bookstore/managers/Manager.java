@@ -1,5 +1,6 @@
 package edu.stevens.cs522.bookstore.managers;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 
@@ -12,15 +13,15 @@ import edu.stevens.cs522.bookstore.async.IEntityCreator;
 
 public abstract class Manager<T> {
 
-    private final Context context;
+    protected final Activity context;//I change to protected and Activity
 
     private final IEntityCreator<T> creator;
 
     private final int loaderID;
 
-    private final String tag;
+    protected final String tag;//I change to protected
 
-    protected Manager(Context context,
+    protected Manager(Activity context,
                       IEntityCreator<T> creator,
                       int loaderID) {
         this.context = context;

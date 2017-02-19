@@ -205,10 +205,8 @@ public class MainActivity extends ListActivity {
 
 
 		Cursor cursor = cartDbAdapter.fetchAllBooks();
-		String[] from =	new	String[] { BookContract.TITLE,
-				BookContract.AUTHORS };
-		int[] to = new	int[] { R.id.cart_row_title,
-				R.id.cart_row_author };
+		String[] from =	new	String[] { BookContract.TITLE, BookContract.AUTHORS };
+		int[] to = new	int[] { R.id.cart_row_title, R.id.cart_row_author };
 		if(cursorAdapter==null) {
 			cursorAdapter = new SimpleCursorAdapter(this, R.layout.cart_row, cursor, from, to);
 			listView.setAdapter(cursorAdapter);

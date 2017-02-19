@@ -16,9 +16,7 @@ public class AsyncContentResolver extends AsyncQueryHandler {
         super(cr);
     }
 
-    public void insertAsync(Uri uri,
-                            ContentValues values,
-                            IContinue<Uri> callback) {
+    public void insertAsync(Uri uri, ContentValues values, IContinue<Uri> callback) {
         this.startInsert(0, callback, uri, values);
     }
 
@@ -48,8 +46,8 @@ public class AsyncContentResolver extends AsyncQueryHandler {
         }
     }
 
-    public void deleteAsync(Uri uri, String select, String[] selectArgs) {
-        // TODO
+    public void deleteAsync(Uri uri, String selection, String[] selectionArgs) {
+        this.startDelete(0, null, uri, selection, selectionArgs);
     }
 
     @Override

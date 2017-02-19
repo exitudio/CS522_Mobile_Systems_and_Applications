@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ public class Book implements Parcelable {
 		String[] authorStrings = BookContract.getAuthors(cursor);
 		for( int i=0; i<authorStrings.length; i++){
 			authorList.add( new Author(authorStrings[i]) );
+//			Log.i(this.getClass().toString(), "authorList:"+authorStrings[i]);
 		}
 		this.authors = authorList.toArray(new Author[authorList.size()]);
 //        this.authors = new Author[]{new Author("f","m","l")};// BookContract.getAuthors(cursor);

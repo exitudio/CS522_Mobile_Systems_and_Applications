@@ -1,8 +1,10 @@
 package edu.stevens.cs522.bookstore.activities;
 
 import android.app.Activity;
+import android.app.ListActivity;
 import android.app.LoaderManager;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.ActionMode;
@@ -20,11 +22,13 @@ import java.util.Set;
 
 import edu.stevens.cs522.bookstore.R;
 import edu.stevens.cs522.bookstore.async.QueryBuilder.IQueryListener;
+import edu.stevens.cs522.bookstore.contracts.BookContract;
+import edu.stevens.cs522.bookstore.entities.Book;
 import edu.stevens.cs522.bookstore.managers.BookManager;
 import edu.stevens.cs522.bookstore.managers.TypedCursor;
 import edu.stevens.cs522.bookstore.util.BookAdapter;
 
-public class MainActivity extends Activity implements OnItemClickListener, AbsListView.MultiChoiceModeListener, IQueryListener {
+public class MainActivity extends ListActivity implements OnItemClickListener, AbsListView.MultiChoiceModeListener, IQueryListener {
 	
 	// Use this when logging errors and warnings.
 	@SuppressWarnings("unused")
@@ -54,7 +58,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         lv.setAdapter(bookAdapter);
 
         // TODO Set listeners for item selection and multi-choice CAB
-
+        lv.setOnItemClickListener(this);
 
         // Initialize the book manager and query for all books
         bookManager = new BookManager(this);
@@ -123,6 +127,17 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
     @Override
     public void handleResults(TypedCursor results) {
         // TODO update the adapter
+        if (results.moveToFirst()) {
+            Book book = new Book(results.getCursor());
+            Log.i(this.getClass().toString(),"handleResults:::"+
+                    BookContract._ID+" : "+book.id+", "+
+                    BookContract.TITLE+" : "+book.title+", "+
+                    BookContract.PRICE+" : "+book.price+", "+
+                    BookContract.ISBN+" : "+book.isbn+", "+
+                    BookContract.AUTHORS+" : "+book.getFirstAuthor()
+            );
+        }
+        bookAdapter.swapCursor(results.getCursor());
     }
 
     @Override
@@ -139,6 +154,13 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         // TODO query for this book's details, and send to ViewBookActivity
         // ok to do on main thread for BookStoreWithContentProvider
+        Log.i(TAG,"click:"+position);
+        Cursor cursor = bookAdapter.getCursor();
+        cursor.moveToPosition(position);
+        Book book = new Book(cursor);
+        Intent checkOutIntent = new Intent(this, ViewBookActivity.class);
+        checkOutIntent.putExtra(ViewBookActivity.BOOK_KEY,book);
+        startActivityForResult(checkOutIntent, CHECKOUT_REQUEST);
     }
 
 

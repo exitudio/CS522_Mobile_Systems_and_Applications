@@ -58,4 +58,8 @@ public class Author implements Parcelable {
 		AuthorContract.putFirstName(out, name);
 		AuthorContract.putBookFk(out, _bookFk);
 	}
+
+	public String toString() {
+		return name;
+	}
 }

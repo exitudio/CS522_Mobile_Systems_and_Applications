@@ -3,6 +3,8 @@ package edu.stevens.cs522.bookstore.activities;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -26,11 +28,14 @@ public class ViewBookActivity extends Activity {
 		// TODO get book as parcelable intent extra and populate the UI with book details.
 		Book book = getIntent().getParcelableExtra(BOOK_KEY);
 
-        for (Author author : book.authors) {
-            authorsAdapter.add(author.name);
-        }
-
-
+		((TextView) findViewById(R.id.view_title)).setText(book.title);
+//        for (Author author : book.authors) {
+//            authorsAdapter.add(author.name);
+//        }
+//
+//		((ListView) findViewById(R.id.view_authors)).setAdapter(authorsAdapter);
+		((TextView) findViewById(R.id.view_isbn)).setText(book.isbn);
+//		((TextView) findViewById(R.id.detailPrice)).setText(book.price.toString());
 	}
 
 }

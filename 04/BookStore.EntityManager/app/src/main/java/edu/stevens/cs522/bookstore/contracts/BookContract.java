@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.util.Log;
 
 import java.util.regex.Pattern;
 
@@ -113,7 +114,12 @@ public class BookContract implements BaseColumns {
         if (authorColumn < 0) {
             authorColumn =  cursor.getColumnIndexOrThrow(AUTHORS);;
         }
-        return readStringArray(cursor.getString(authorColumn));
+        String authorsString = cursor.getString(authorColumn);
+        if(authorsString==null){
+            return new String[]{""};
+        }else{
+            return readStringArray(authorsString);
+        }
     }
 
 
