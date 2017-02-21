@@ -5,6 +5,7 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 /**
  * Created by dduggan.
@@ -46,14 +47,19 @@ public class AsyncContentResolver extends AsyncQueryHandler {
         }
     }
 
-    public void deleteAsync(Uri uri, String selection, String[] selectionArgs) {
-        this.startDelete(0, null, uri, selection, selectionArgs);
+    public void deleteAsync(Uri uri, String selection, String[] selectionArgs, IContinue<Integer> callback) {
+        this.startDelete(0, callback, uri, selection, selectionArgs);
     }
 
     @Override
     protected void onDeleteComplete(int token, Object cookie, int result) {
         super.onDeleteComplete(token, cookie, result);
-        // TODO
+        Log.i(this.getClass().toString(), "token:"+token+" result:"+result);
+        if (cookie != null) {
+            @SuppressWarnings("unchecked")
+            IContinue<Integer> callback = (IContinue<Integer>) cookie;
+            callback.kontinue(result);
+        }
     }
 
     public void updateAsync(Uri uri, String select, String[] selectArgs) {

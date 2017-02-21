@@ -28,14 +28,16 @@ public class ViewBookActivity extends Activity {
 		// TODO get book as parcelable intent extra and populate the UI with book details.
 		Book book = getIntent().getParcelableExtra(BOOK_KEY);
 
+
+		authorsAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1);
 		((TextView) findViewById(R.id.view_title)).setText(book.title);
-//        for (Author author : book.authors) {
-//            authorsAdapter.add(author.name);
-//        }
+        for (Author author : book.authors) {
+            authorsAdapter.add(author.name);
+        }
 //
-//		((ListView) findViewById(R.id.view_authors)).setAdapter(authorsAdapter);
+		((ListView) findViewById(R.id.view_authors)).setAdapter(authorsAdapter);
 		((TextView) findViewById(R.id.view_isbn)).setText(book.isbn);
-//		((TextView) findViewById(R.id.detailPrice)).setText(book.price.toString());
+		((TextView) findViewById(R.id.view_price)).setText(book.price.toString());
 	}
 
 }

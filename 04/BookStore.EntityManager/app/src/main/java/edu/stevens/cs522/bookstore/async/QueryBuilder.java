@@ -50,20 +50,6 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
         this.listener = listener;
     }
 
-    // I create [ not use]
-    private Activity activity;
-    public QueryBuilder(Activity activity, int loaderId){
-        this.activity = activity;
-        LoaderManager loaderManager = activity.getLoaderManager();
-
-        if (loaderManager.getLoader(loaderId) == null) {
-            loaderManager.initLoader(loaderId, null, this);
-        } else {
-            loaderManager.restartLoader(loaderId, null, this);
-        }
-    }
-
-
 
     // TODO complete the implementation of this
 
@@ -76,7 +62,7 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
         Log.i("QueryBuilder","onCreateLoader::"+loaderID);
         //slide 34
         switch (loaderID) {
-            case BookManager.TEMP_LOADER_ID:
+            case BookManager.LOADER_ID:
                 return new CursorLoader(context,uri, null, null, null, null);
             default:
                 return null; //Throw exception; An invalid id was passed in
@@ -99,10 +85,10 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
                 );
             }while (cursor.moveToNext());
         }
-
+        cursor.setNotificationUri(context.getContentResolver(), uri);
 
         //slide75
-        if (loaders.getId() == BookManager.TEMP_LOADER_ID) {
+        if (loaders.getId() == BookManager.LOADER_ID) {
             listener.handleResults(new TypedCursor<T>(cursor, creator));
         } else {
             throw new IllegalStateException("Unexpected loader callback");
@@ -111,6 +97,7 @@ public class QueryBuilder<T> implements LoaderManager.LoaderCallbacks<Cursor> {
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        Log.i(this.getClass().toString(), "onLoaderReset");
         if (loader.getId() == loaderID) {
             listener.closeResults();
         }else{

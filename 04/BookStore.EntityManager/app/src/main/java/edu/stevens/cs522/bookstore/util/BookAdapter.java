@@ -36,7 +36,7 @@ public class BookAdapter extends ResourceCursorAdapter {
         TextView authorLine	= (TextView) view.findViewById(R.id.cart_row_author);
         Book book = new Book(cursor);
         titleLine.setText(book.title);
-        authorLine.setText(book.authors.toString());
+        authorLine.setText(book.getFirstAuthor());
     }
 
     @Override

@@ -4,9 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import edu.stevens.cs522.bookstore.contracts.BookContract;
@@ -93,7 +95,17 @@ public class Book implements Parcelable {
 		BookContract.putTitle(out, title);
 		BookContract.putIsbn(out, isbn);
 		BookContract.putPrice(out, price);
+
+		BookContract.putAuthors(out, getAuthorNames());
+//		Log.i(this.getClass().toString(),TextUtils.join("|",authorsString));
 	}
 
+	public String[] getAuthorNames(){
+		String[] authorsString = new String[authors.length];
+		for(int i=0; i<authors.length; i++) {
+			authorsString[i]=authors[i].toString();
+		}
+		return authorsString;
+	}
 
 }

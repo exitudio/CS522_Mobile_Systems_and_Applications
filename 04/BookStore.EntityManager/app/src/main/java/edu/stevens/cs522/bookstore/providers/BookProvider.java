@@ -33,13 +33,13 @@ public class BookProvider extends ContentProvider {
 
 
     private static final String DATABASE_NAME = "books.db";
-    private static final int DATABASE_VERSION = 7;
+    private static final int DATABASE_VERSION = 9;
     private static final String BOOKS_TABLE = "books";
     private static final String AUTHORS_TABLE = "authors";
 
     // Create the constants used to differentiate between the different URI  requests.
-    private static final int ALL_ROWS = 1;// I changed to public
-    private static final int SINGLE_ROW = 2;// I changed to public
+    private static final int ALL_ROWS = 1;
+    private static final int SINGLE_ROW = 2;
 
     public static class DbHelper extends SQLiteOpenHelper {
         private static final String DATABASE_CREATE = "CREATE TABLE IF NOT EXISTS ";
@@ -211,10 +211,17 @@ public class BookProvider extends ContentProvider {
                 // Make sure to notify any observers
 
                 //slide 19
-                long row = db.insert(BOOKS_TABLE,null,values);
-                Log.i(this.getClass().toString(),"Uri insert row:"+row);
-                if(row>0){
-                    Uri instanceUri = BookContract.CONTENT_URI(row);
+                long bookId = db.insert(BOOKS_TABLE,null,values);
+                Log.i(this.getClass().toString(),"Uri insert row:"+bookId);
+                String[] authorsString = BookContract.getAuthors(values);
+                for( int i=0; i<authorsString.length; i++) {
+                    ContentValues authorCv=new ContentValues();
+                    Author author = new Author(authorsString[i]);
+                    author.writeToProvider(authorCv, (int) bookId);
+                    long authorId = db.insert(AUTHORS_TABLE, null, authorCv );
+                }
+                if(bookId>0){
+                    Uri instanceUri = BookContract.CONTENT_URI(bookId);
                     ContentResolver cr = getContext().getContentResolver();
                     cr.notifyChange(instanceUri,null);
                     return instanceUri;
@@ -232,26 +239,21 @@ public class BookProvider extends ContentProvider {
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         Log.i(this.getClass().toString(),"[query] uri:"+uri+", projection:"+projection+", selection:"+selection+", selectionArgs:"+selectionArgs+", sortOrder:"+sortOrder);
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor cursor;
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
                 // TODO: Implement this to handle query of all books.
-                Cursor cursor = db.query(BOOKS_TABLE,
-                        new String[]{BookContract._ID, BookContract.TITLE, BookContract.PRICE, BookContract.ISBN, BookContract.AUTHORS},
-                        selection,
-                        selectionArgs,
-                        null,
-                        null,
-                        sortOrder);
-                /*Cursor cursor = db.rawQuery("SELECT " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN + ", " +
+                cursor = db.rawQuery("SELECT " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN + ", " +
                                 "GROUP_CONCAT(" + AuthorContract.NAME + ",'|') as " + BookContract.AUTHORS + " " +
                                 "FROM " + BOOKS_TABLE + " JOIN " + AUTHORS_TABLE + " " +
                                 "ON " + BOOKS_TABLE + "." + BookContract._ID + " = " + AUTHORS_TABLE + "." + AuthorContract.BOOK_FK + " " +
                                 "GROUP BY " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN
-                        , null);*/
+                        , null);
                 if (cursor.moveToFirst()) {
                     do{
                         Book book = new Book(cursor);
-                        Log.i("****** BOOK TABLE ****",
+                        Log.i(this.getClass().toString(),
+                                "ALL_ROWS:"+
                                 BookContract._ID+" : "+book.id+", "+
                                         BookContract.TITLE+" : "+book.title+", "+
                                         BookContract.PRICE+" : "+book.price+", "+
@@ -265,9 +267,31 @@ public class BookProvider extends ContentProvider {
 
             case SINGLE_ROW:
                 // TODO: Implement this to handle query of a specific book.
-                // String selection = BookContract._ID+"=?";
-                // String[] selectionArgs = {getId(uri)};
-                throw new UnsupportedOperationException("Not yet implemented");
+//                selection = BookContract._ID+"=?";
+//                selectionArgs = new String[]{String.valueOf(BookContract.getId(uri))};
+                long bookId = BookContract.getId(uri);
+
+                cursor = db.rawQuery("SELECT " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN + ", " +
+                                "GROUP_CONCAT(" + AuthorContract.NAME + ",'|') as " + BookContract.AUTHORS + " " +
+                                "FROM " + BOOKS_TABLE + " JOIN " + AUTHORS_TABLE + " " +
+                                "ON " + BOOKS_TABLE + "." + BookContract._ID + " = " + AUTHORS_TABLE + "." + AuthorContract.BOOK_FK + " " +
+                                "WHERE "+BOOKS_TABLE+"."+BookContract._ID+" = "+bookId+" "+
+                                "GROUP BY " + BOOKS_TABLE + "." + BookContract._ID + " ," + BookContract.TITLE + " ," + BookContract.PRICE + " ," + BookContract.ISBN
+                        , null);
+                if (cursor.moveToFirst()) {
+                    do{
+                        Book book = new Book(cursor);
+                        Log.i(this.getClass().toString(),
+                                "SINGLE_ROW:"+
+                                BookContract._ID+" : "+book.id+", "+
+                                        BookContract.TITLE+" : "+book.title+", "+
+                                        BookContract.PRICE+" : "+book.price+", "+
+                                        BookContract.ISBN+" : "+book.isbn+", "+
+                                        BookContract.AUTHORS+" : "+book.getFirstAuthor()
+                        );
+                    }while (cursor.moveToNext());
+                }
+                return cursor;
             default:
                 throw new IllegalStateException("insert: bad case");
         }
@@ -290,11 +314,27 @@ public class BookProvider extends ContentProvider {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+        db.execSQL("PRAGMA	foreign_keys=ON;");
+        Log.i(this.getClass().toString(),"delete uri:"+uri);
+        Log.i(this.getClass().toString(),"delete uriMatcher.match(uri):"+uriMatcher.match(uri));
         switch (uriMatcher.match(uri)) {
             case ALL_ROWS:
-                int row = db.delete(BOOKS_TABLE,selection,selectionArgs);
-                Log.i(this.getClass().toString(),"Uri delet row:"+row);
-                return row;
+                if( selection==null||selectionArgs==null){
+                    db.delete(BOOKS_TABLE, null, null);
+                    ContentResolver cr = getContext().getContentResolver();
+                    cr.notifyChange(BookContract.CONTENT_URI, null);
+                    return -1;
+                }else {
+                    int row = db.delete(BOOKS_TABLE, selection, selectionArgs);
+                    Log.i(this.getClass().toString(), "Uri delete row:" + row);
+                    if (row > 0) {
+                        Uri instanceUri = BookContract.CONTENT_URI(row);
+                        ContentResolver cr = getContext().getContentResolver();
+                        cr.notifyChange(instanceUri, null);
+                    }
+
+                    return row;
+                }
             case SINGLE_ROW:
                 return -1;
             default:

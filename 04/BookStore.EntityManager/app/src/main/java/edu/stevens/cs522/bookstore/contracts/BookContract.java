@@ -9,6 +9,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.BaseColumns;
+import android.text.TextUtils;
 import android.util.Log;
 
 import java.util.regex.Pattern;
@@ -101,8 +102,7 @@ public class BookContract implements BaseColumns {
      */
     public static final char SEPARATOR_CHAR = '|';
 
-    private static final Pattern SEPARATOR =
-            Pattern.compile(Character.toString(SEPARATOR_CHAR), Pattern.LITERAL);
+    private static final Pattern SEPARATOR = Pattern.compile(Character.toString(SEPARATOR_CHAR), Pattern.LITERAL);
 
     public static String[] readStringArray(String in) {
         return SEPARATOR.split(in);
@@ -121,7 +121,13 @@ public class BookContract implements BaseColumns {
             return readStringArray(authorsString);
         }
     }
-
+    public static void putAuthors(ContentValues values, String[] authors) {
+        values.put(AUTHORS, TextUtils.join("|",authors) );
+    }
+    public static String[] getAuthors(ContentValues values){
+        String authorsNameString = (String) values.get(AUTHORS);
+        return readStringArray(authorsNameString);
+    }
 
     /*
      * ISBN column

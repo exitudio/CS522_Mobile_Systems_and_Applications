@@ -18,11 +18,13 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import edu.stevens.cs522.bookstore.R;
+import edu.stevens.cs522.bookstore.async.IContinue;
 import edu.stevens.cs522.bookstore.async.QueryBuilder.IQueryListener;
 import edu.stevens.cs522.bookstore.contracts.BookContract;
 import edu.stevens.cs522.bookstore.entities.Book;
@@ -79,7 +81,6 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         Log.i(TAG,"onCreateOptionMenu");
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.bookstore_menu, menu);
-
         return true;
 	}
 
@@ -108,24 +109,38 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         // Use ADD_REQUEST and CHECKOUT_REQUEST codes to distinguish the cases.
         switch(requestCode) {
             case ADD_REQUEST:
-                // ADD: add the book that is returned to the shopping cart.
-                // It is okay to do this on the main thread for BookStoreWithContentProvider
-                Book book = (Book) intent.getParcelableExtra(AddBookActivity.BOOK_RESULT_KEY);
-                bookManager.persistAsync(book);
-                bookManager.getAllBooksAsync(this);
+                if(resultCode == Activity.RESULT_OK) {
+                    // ADD: add the book that is returned to the shopping cart.
+                    // It is okay to do this on the main thread for BookStoreWithContentProvider
+                    Book book = (Book) intent.getParcelableExtra(AddBookActivity.BOOK_RESULT_KEY);
+                    bookManager.persistAsync(book);
+                    bookManager.getAllBooksAsync(this);
+                }
                 break;
             case CHECKOUT_REQUEST:
-                // CHECKOUT: empty the shopping cart.
-                // It is okay to do this on the main thread for BookStoreWithContentProvider
+                if(resultCode == Activity.RESULT_OK) {
+                    // CHECKOUT: empty the shopping cart.
+                    // It is okay to do this on the main thread for BookStoreWithContentProvider
+                    final int bookNumber = bookAdapter.getCursor().getCount();
+                    final String unitString = bookNumber>1?" books":" book";
+
+                    bookManager.deleteBooksAsync(new IContinue<Integer>() {
+                        @Override
+                        public void kontinue(Integer value) {
+                            Toast.makeText(getApplicationContext(), "Checked Out "+bookNumber+unitString,
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                }
                 break;
         }
-
 	}
 	
 	@Override
 	public void onSaveInstanceState(Bundle savedInstanceState) {
 		// TODO save the shopping cart contents (which should be a list of parcelables).
-		
+
 	}
 
     /*
@@ -145,11 +160,13 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
                     BookContract.AUTHORS+" : "+book.getFirstAuthor()
             );
         }
-        bookAdapter.swapCursor(results.getCursor());
+//        bookAdapter.swapCursor(results.getCursor());
+        bookAdapter.changeCursor(results.getCursor()); //same as swapCursor but cursor.close() too. I didn't see the different
     }
 
     @Override
     public void closeResults() {
+        Log.i(TAG,"closeResults");
         // TODO update the adapter
     }
 
@@ -166,9 +183,15 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
         Cursor cursor = bookAdapter.getCursor();
         cursor.moveToPosition(position);
         Book book = new Book(cursor);
-        Intent checkOutIntent = new Intent(this, ViewBookActivity.class);
-        checkOutIntent.putExtra(ViewBookActivity.BOOK_KEY,book);
-        startActivityForResult(checkOutIntent, CHECKOUT_REQUEST);
+        final Activity _this = this;
+        bookManager.getBookAsync(book.id, new IContinue<Book>() {
+            @Override
+            public void kontinue(Book value) {
+                Intent checkOutIntent = new Intent(_this, ViewBookActivity.class);
+                checkOutIntent.putExtra(ViewBookActivity.BOOK_KEY,value);
+                startActivityForResult(checkOutIntent, CHECKOUT_REQUEST);
+            }
+        });
     }
 
 

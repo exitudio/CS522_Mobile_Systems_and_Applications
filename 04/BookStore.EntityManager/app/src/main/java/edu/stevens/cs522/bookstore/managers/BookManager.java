@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 
+import java.util.List;
 import java.util.Set;
 
 import edu.stevens.cs522.bookstore.async.AsyncContentResolver;
@@ -15,6 +16,7 @@ import edu.stevens.cs522.bookstore.async.IContinue;
 import edu.stevens.cs522.bookstore.async.IEntityCreator;
 import edu.stevens.cs522.bookstore.async.QueryBuilder;
 import edu.stevens.cs522.bookstore.async.QueryBuilder.IQueryListener;
+import edu.stevens.cs522.bookstore.async.SimpleQueryBuilder;
 import edu.stevens.cs522.bookstore.contracts.AuthorContract;
 import edu.stevens.cs522.bookstore.contracts.BookContract;
 import edu.stevens.cs522.bookstore.entities.Author;
@@ -27,8 +29,7 @@ import edu.stevens.cs522.bookstore.providers.BookProvider;
 
 public class BookManager extends Manager<Book> {
 
-    public static final int TEMP_LOADER_ID = 10;
-    private static final int LOADER_ID = 1;
+    public static final int LOADER_ID = 1;
 
     private static final IEntityCreator<Book> creator = new IEntityCreator<Book>() {
         @Override
@@ -60,7 +61,7 @@ public class BookManager extends Manager<Book> {
         QueryBuilder.executeQuery(
                 tag,
                 context,
-                BookContract.CONTENT_URI, TEMP_LOADER_ID,
+                BookContract.CONTENT_URI, LOADER_ID,
                 new IEntityCreator<Book>() {
                     @Override
                     public Book create(Cursor cursor) {
@@ -72,14 +73,33 @@ public class BookManager extends Manager<Book> {
                 );
     }
 
-    public void getBookAsync(long id, IContinue<Book> callback) {
+    public void getBookAsync(long id, final IContinue<Book> callback) {
         // TODO
+        //slide68-69
+        SimpleQueryBuilder.executeQuery(context, BookContract.CONTENT_URI(id),
+                new IEntityCreator<Book>() {
+                    @Override
+                    public Book create(Cursor cursor) {
+                        Log.i(tag,"getBookAsync : create");
+                        return new Book(cursor);
+                    }
+                },  new SimpleQueryBuilder.ISimpleQueryListener<Book>() {
+                    public void handleResults(List<Book> books) {
+                        Log.i(tag,"getBookAsync : handleResults"+books.size());
+                        for(Book book :books){
+                            Log.i(tag,"getBookAsync : book.title:"+book);
+                        }
+                        callback.kontinue(books.get(0));
+                    }
+                });
     }
 
     public void persistAsync(final Book book) {
         //slide 58-59
         ContentValues values = new ContentValues();
         book.writeToProvider(values);
+
+//        context.getContentResolver().insert(BookContract.CONTENT_URI,values);
         getAsyncResolver().insertAsync(BookContract.CONTENT_URI, values,
                 new IContinue<Uri>() {
                     public void kontinue(Uri uri) {
@@ -107,8 +127,12 @@ public class BookManager extends Manager<Book> {
             }
         }
         String select = sb.toString();
+        Log.i(tag,"deleteBooksAsync: select="+select);
+        contentResolver.deleteAsync(BookContract.CONTENT_URI, select, args, null);
+    }
 
-        contentResolver.deleteAsync(BookContract.CONTENT_URI, select, args);
+    public void deleteBooksAsync(IContinue<Integer> callback) {
+        contentResolver.deleteAsync(BookContract.CONTENT_URI, null, null, callback);
     }
 
 }
