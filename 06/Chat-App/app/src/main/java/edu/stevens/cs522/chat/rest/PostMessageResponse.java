@@ -1,6 +1,8 @@
 package edu.stevens.cs522.chat.rest;
 
 import android.os.Parcel;
+import android.util.JsonReader;
+import android.util.Log;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -12,8 +14,8 @@ import java.util.UUID;
 
 public class PostMessageResponse extends Response {
 
-    public PostMessageResponse(HttpURLConnection connection) throws IOException {
-        super(connection);
+    public PostMessageResponse(HttpURLConnection connection, JsonReader jsonReader) throws IOException {
+        super(connection, jsonReader);
     }
 
     @Override
@@ -27,6 +29,7 @@ public class PostMessageResponse extends Response {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         // TODO
+        super.writeToParcel(dest,flags);
     }
 
     public PostMessageResponse(Parcel in) {

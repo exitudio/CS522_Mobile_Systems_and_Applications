@@ -17,7 +17,6 @@ import java.util.UUID;
 import edu.stevens.cs522.chat.util.DateUtils;
 import edu.stevens.cs522.chat.util.EnumUtils;
 
-import static edu.stevens.cs522.chat.rest.Response.REQUEST_ID_HEADER;
 import static edu.stevens.cs522.chat.rest.Response.ResponseType.POSTMESSAGE;
 import static edu.stevens.cs522.chat.rest.Response.createResponse;
 
@@ -158,6 +157,7 @@ public abstract class Request implements Parcelable {
     // App-specific HTTP request headers.
     public Map<String,String> getRequestHeaders() {
         Map<String,String> headers = new HashMap<>();
+        Log.i(TAG,"getRequestHeader(): id="+id);
         headers.put(REQUEST_ID_HEADER, Long.toString(id));
         headers.put(CHAT_NAME_HEADER, chatName);
         headers.put(TIMESTAMP_HEADER, Long.toString(timestamp.getTime()));

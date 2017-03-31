@@ -73,10 +73,11 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
 
         setContentView(R.layout.register);
 
-        // TODO instantiate helper for service
-        helper = new ChatHelper(this);
+
         // TODO initialize registerResultReceiver
         registerResultReceiver = new ResultReceiverWrapper(new Handler());
+        // TODO instantiate helper for service
+        helper = new ChatHelper(this,registerResultReceiver);
 
         userNameText = (EditText) findViewById(R.id.chat_name_text);
 

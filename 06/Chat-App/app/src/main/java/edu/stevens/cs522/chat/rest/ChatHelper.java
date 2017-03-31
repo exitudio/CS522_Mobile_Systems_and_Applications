@@ -2,11 +2,14 @@ package edu.stevens.cs522.chat.rest;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
 import android.os.ResultReceiver;
+import android.util.Log;
 
 import java.util.UUID;
 
 import edu.stevens.cs522.chat.settings.Settings;
+import edu.stevens.cs522.chat.util.ResultReceiverWrapper;
 
 
 /**
@@ -18,13 +21,15 @@ public class ChatHelper {
     public static final String DEFAULT_CHAT_ROOM = "_default";
 
     private Context context;
+    private ResultReceiverWrapper resultReceiverWrapper;
 
     private String chatName;
 
     private UUID clientID;
 
-    public ChatHelper(Context context) {
+    public ChatHelper(Context context, ResultReceiverWrapper resultReceiverWrapper) {
         this.context = context;
+        this.resultReceiverWrapper = resultReceiverWrapper;
         this.chatName = Settings.getChatName(context);
         this.clientID = Settings.getClientId(context);
     }
@@ -35,7 +40,7 @@ public class ChatHelper {
             RegisterRequest request = new RegisterRequest(chatName, clientID);
             this.chatName = chatName;
             Settings.saveChatName(context, chatName);
-            addRequest(request);
+            addRequest(request,resultReceiverWrapper);
         }
     }
 
@@ -45,8 +50,9 @@ public class ChatHelper {
             if (chatRoom == null || chatRoom.isEmpty()) {
                 chatRoom = DEFAULT_CHAT_ROOM;
             }
+            Log.i(this.getClass().toString(), "postMessage() chatRoom="+chatRoom+", message="+message);
             PostMessageRequest request = new PostMessageRequest(chatName, clientID, chatRoom, message);
-            addRequest(request);
+            addRequest(request,resultReceiverWrapper);
         }
     }
 
@@ -54,9 +60,10 @@ public class ChatHelper {
         context.startService(createIntent(context, request, receiver));
     }
 
-    private void addRequest(Request request) {
-        addRequest(request, null);
-    }
+// I think it's redundant
+//    private void addRequest(Request request) {
+//        addRequest(request, null);
+//    }
 
     /**
      * Use an intent to send the request to a background service. The request is included as a Parcelable extra in

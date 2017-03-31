@@ -31,6 +31,7 @@ import android.widget.CursorAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -122,8 +123,13 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
         messageManager.getAllMessagesAsync(this);
 
         // TODO instantiate helper for service
+        helper = new ChatHelper(this, sendResultReceiver);
 
 
+        //--- EKKASIT EDIT --
+        messageText = (EditText) findViewById(R.id.message_text);
+        sendButton = (Button) findViewById(R.id.send_button);
+        sendButton.setOnClickListener(this);
     }
 
 	public void onResume() {
@@ -182,9 +188,10 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
 
             String chatRoom;
 
-            String message = null;
+            String message = messageText.getText().toString();
 
             // TODO get chatRoom and message from UI, and use helper to post a message
+            helper.postMessage(null,message);
             // TODO add the message to the database
 
 
@@ -202,9 +209,11 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
         switch (resultCode) {
             case RESULT_OK:
                 // TODO show a success toast message
+                Toast.makeText(this, "Message sent successfully.", Toast.LENGTH_SHORT).show();
                 break;
             default:
                 // TODO show a failure toast message
+                Toast.makeText(this, "Message sent fail.", Toast.LENGTH_SHORT).show();
                 break;
         }
     }

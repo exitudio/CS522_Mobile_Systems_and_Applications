@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.util.JsonReader;
 import android.util.JsonWriter;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -27,15 +28,14 @@ public class PostMessageRequest extends Request {
 
     public PostMessageRequest(String chatName, UUID clientID, String chatRoom, String message) {
         super(chatName, clientID);
-        this.chatName = chatRoom;
+        this.chatRoom = chatRoom;
         this.message = message;
+        Log.i(this.getClass().toString(), "PostMessageRequest() chatRoom="+chatRoom+", message="+message);
     }
 
     @Override
     public Map<String, String> getRequestHeaders() {
-        Map<String,String> headers = new HashMap<>();
-        // TODO
-        return headers;
+        return super.getRequestHeaders();
     }
 
     @Override
@@ -43,13 +43,20 @@ public class PostMessageRequest extends Request {
         StringWriter wr = new StringWriter();
         JsonWriter jw = new JsonWriter(wr);
         // TODO write a JSON message of the form:
+        jw.beginObject();
+        jw.name("chatroom").value(chatRoom);
+        jw.name("text").value(message);
+        jw.endObject();
+        jw.flush();
         // { "room" : <chat-room-name>, "message" : <message-text> }
-        return null;
+        Log.i(this.getClass().toString(), "getRequestEntity() chatRoom="+chatRoom+", message="+message);
+        Log.i(this.getClass().toString(),"getRequestEntity() wr.toString()="+wr.toString());
+        return wr.toString();
     }
 
     @Override
     public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException{
-        return new PostMessageResponse(connection);
+        return new PostMessageResponse(connection, rd);
     }
 
     @Override
@@ -65,6 +72,9 @@ public class PostMessageRequest extends Request {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         // TODO
+        super.writeToParcel(dest,flags);
+        dest.writeString(this.chatRoom);
+        dest.writeString(this.message);
     }
 
     public PostMessageRequest(String chatName, UUID clientID) {
@@ -74,6 +84,8 @@ public class PostMessageRequest extends Request {
     public PostMessageRequest(Parcel in) {
         super(in);
         // TODO
+        this.chatRoom = in.readString();
+        this.message = in.readString();
     }
 
     public static Creator<PostMessageRequest> CREATOR = new Creator<PostMessageRequest>() {

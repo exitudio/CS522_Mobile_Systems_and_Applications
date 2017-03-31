@@ -3,9 +3,21 @@ package edu.stevens.cs522.chat.rest;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.os.ResultReceiver;
 import android.util.Log;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import edu.stevens.cs522.chat.util.ResultReceiverWrapper;
+
+import static android.app.Activity.RESULT_OK;
 import static android.content.Intent.ACTION_SEND;
 
 /**
@@ -36,10 +48,16 @@ public class RequestService extends IntentService {
         ResultReceiver receiver = intent.getParcelableExtra(RESULT_RECEIVER_KEY);
         Log.i(this.getClass().toString(),"onHandleIntent: clientID"+request.clientID.toString());
         Response response = processor.process(request);
+        Log.i(this.getClass().toString()," onHandleIntent() : httpResponseCode="+response.httpResponseCode);
+        Log.i(this.getClass().toString()," onHandleIntent() : httpResponseMessage="+response.httpResponseMessage);
 
         if (receiver != null) {
             // TODO UI should display a toast message on completion of the operation
+            Log.i(this.getClass().toString(), "receiver");
+            receiver.send(RESULT_OK, null);
         }
     }
+
+
 
 }

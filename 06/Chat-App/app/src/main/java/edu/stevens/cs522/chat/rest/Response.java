@@ -3,10 +3,13 @@ package edu.stevens.cs522.chat.rest;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Config;
+import android.util.JsonReader;
 import android.util.Log;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.List;
+import java.util.Map;
 
 import edu.stevens.cs522.chat.util.EnumUtils;
 
@@ -25,7 +28,8 @@ public abstract class Response implements Parcelable {
         UNREGISTER
     }
 
-    public final static String REQUEST_ID_HEADER = Request.REQUEST_ID_HEADER;
+    //redundant
+    //public final static String REQUEST_ID_HEADER = Request.REQUEST_ID_HEADER;
 
     public final static String RESPONSE_MESSAGE_HEADER = "X-Response-Message";
 
@@ -48,11 +52,37 @@ public abstract class Response implements Parcelable {
 
     public abstract boolean isValid();
 
-    public Response(HttpURLConnection connection) throws IOException {
+    public Response(HttpURLConnection connection, JsonReader jsonReader) throws IOException {
 
-        String reqIdHeader = connection.getHeaderField(REQUEST_ID_HEADER);
+        //-------- Log all header ------------------------------------------
+        Map<String, List<String>> headerFields = connection.getHeaderFields();
+        for (Map.Entry<String, List<String>> entry : headerFields.entrySet()) {
+            String key = entry.getKey();
+            if (key != null) {
+                for (String value : entry.getValue()) {
+                    if (value != null) {
+                        Log.i(TAG, key+":"+value);
+                    }
+                }
+            }
+        }
+        //----------- ADD id by json instead of header -----------------
+        jsonReader.beginObject();
+        while (jsonReader.hasNext()) {
+            String name = jsonReader.nextName();
+            if (name.equals("id")) {
+                id = jsonReader.nextInt();
+            } else {
+                jsonReader.skipValue();
+            }
+        }
+        jsonReader.endObject();
+        Log.i(this.getClass().toString(), "PostMessageResponse() jsonreader.id="+id);
+        //-------------------------------------------------------------------
+
+        String reqIdHeader = connection.getHeaderField(Request.REQUEST_ID_HEADER);
         if (reqIdHeader == null) {
-            Log.w(TAG, "Missing HTTP response header: X-REQUEST-ID");
+            Log.w(TAG, "Missing HTTP response header: X-REQUEST-ID"); // this bug come from server no header for X-REQUEST-ID see above code.
         } else {
             try {
                 id = Long.parseLong(reqIdHeader);
@@ -69,7 +99,7 @@ public abstract class Response implements Parcelable {
         httpResponseCode = connection.getResponseCode();
 
         httpResponseMessage = connection.getResponseMessage();
-
+        Log.i(TAG,"Response() httpResponseMessage="+httpResponseMessage);
     }
 
     public Response(long id, String responseMessage, int httpResponseCode, String httpResponseMessage) {

@@ -26,6 +26,7 @@ public class RegisterResponse extends Response {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         // TODO
+        super.writeToParcel(dest,flags);
     }
 
     public RegisterResponse(Parcel in) {

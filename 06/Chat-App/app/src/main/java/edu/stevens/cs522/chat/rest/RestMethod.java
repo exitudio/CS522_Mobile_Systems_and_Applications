@@ -9,6 +9,8 @@ import android.util.Config;
 import android.util.JsonReader;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -106,7 +108,7 @@ public class RestMethod {
             Log.i(TAG,"perform Register try a");
             Log.i(TAG,"perform Register try b");
             initConnection(url, request);
-            return executeRequest(request);
+            return executeRequest(PUT_METHOD,request);
         } catch (SocketTimeoutException e) {
             Log.i(TAG,"perform register SocketTimeoutException");
             return isUnavailable(request);
@@ -120,14 +122,15 @@ public class RestMethod {
     }
 
     public Response perform(PostMessageRequest request) {
-        URL url = postMessageURL();
+        URL url = postMessageURL(request.clientID);
         if (url == null) {
             throw new IllegalStateException("Missing URL for posting messages!");
         }
         try {
             getWakeLock(context, SERVICE_DURATION);
             initConnection(url, request);
-            return executeRequest(request);
+            return executeRequest(POST_METHOD, request);
+            //return executeOnewayRequest(request);
         } catch (SocketTimeoutException e) {
             Log.i(TAG,"perform post SocketTimeoutException");
             return isUnavailable(request);
@@ -151,8 +154,14 @@ public class RestMethod {
         //return new URL("http","exits-mbp.home",8080,"chat/register");
     }
 
-    private URL postMessageURL() {
-        return null;  // TODO
+    private URL postMessageURL(UUID clientID) {
+        try {
+            return new URL(BASE_URL+clientID.toString()+"/messages");//"http://exits-mbp.home:8080/chat/register"
+        }
+        catch (MalformedURLException e) {
+            System.out.println(e.getMessage());
+            return null;
+        }
     }
 
     private PowerManager.WakeLock wakeLock;
@@ -235,6 +244,7 @@ public class RestMethod {
         Map<String,String> headers = request.getRequestHeaders();
         for (Map.Entry<String,String> header : headers.entrySet()) {
             if (header.getValue() != null) {
+                Log.i(TAG," initConnection() key:"+header.getKey()+", value:"+ header.getValue());
                 connection.addRequestProperty(header.getKey(), header.getValue());
             } else {
                 Log.w(TAG, "Ignoring empty header value for "+header.getKey());
@@ -244,9 +254,10 @@ public class RestMethod {
 
     }
 
-    private Response executeRequest(Request request) throws SocketTimeoutException, IOException {
-        return executeRequest(PUT_METHOD, request);
-    }
+    //redundant
+//    private Response executeRequest(Request request) throws SocketTimeoutException, IOException {
+//        return executeRequest(PUT_METHOD, request);
+//    }
 
     private Response executeRequest(String method, Request request) throws SocketTimeoutException, IOException {
 
@@ -260,15 +271,18 @@ public class RestMethod {
         throwErrors(connection);
 
         downloadConnection = connection.getInputStream();
-        JsonReader rd = new JsonReader(new BufferedReader(new InputStreamReader(downloadConnection)));
-        Response response = request.getResponse(connection, rd);
-        // rd.close(); TODO close connection?
+        JsonReader reader = new JsonReader(new BufferedReader(new InputStreamReader(downloadConnection)));
+
+        Response response = request.getResponse(connection, reader); // I add reader for read json response
+        //TODO close connection?
+        reader.close();
         return response;
     }
 
-    private Response executeOnewayRequest(Request request) throws SocketTimeoutException, IOException {
-        return executeOnewayRequest(POST_METHOD, request);
-    }
+    //redundant
+//    private Response executeOnewayRequest(Request request) throws SocketTimeoutException, IOException {
+//        return executeOnewayRequest(POST_METHOD, request);
+//    }
 
     private Response executeOnewayRequest(String method, Request request) throws SocketTimeoutException, IOException {
 		/*
@@ -327,6 +341,7 @@ public class RestMethod {
 
     private void throwErrors(HttpURLConnection connection) throws IOException {
         final int status = connection.getResponseCode();
+        Log.i(TAG,"throwErrors() status="+status);
         if (status < 200 || status >= 300) {
             throw new IOException(getErrorResponseMessage(connection));
         }

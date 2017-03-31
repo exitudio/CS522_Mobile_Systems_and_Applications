@@ -22,13 +22,7 @@ public class RegisterRequest extends Request {
 
     @Override
     public Map<String, String> getRequestHeaders() {
-        Map<String,String> headers = new HashMap<>();
-        headers.put(REQUEST_ID_HEADER, Long.toString(id));
-        headers.put(CHAT_NAME_HEADER, chatName);
-        headers.put(TIMESTAMP_HEADER, Long.toString(timestamp.getTime()));
-        headers.put(LONGITUDE_HEADER, Double.toString(123));
-        headers.put(LATITUDE_HEADER, Double.toString(123));
-        return headers;
+        return super.getRequestHeaders();
     }
 
     @Override
