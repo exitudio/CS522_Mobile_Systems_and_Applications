@@ -114,7 +114,7 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
                     // It is okay to do this on the main thread for BookStoreWithContentProvider
                     Book book = (Book) intent.getParcelableExtra(AddBookActivity.BOOK_RESULT_KEY);
                     bookManager.persistAsync(book);
-                    bookManager.getAllBooksAsync(this);
+//                    bookManager.getAllBooksAsync(this);
                 }
                 break;
             case CHECKOUT_REQUEST:
@@ -160,8 +160,8 @@ public class MainActivity extends Activity implements OnItemClickListener, AbsLi
                     BookContract.AUTHORS+" : "+book.getFirstAuthor()
             );
         }
-//        bookAdapter.swapCursor(results.getCursor());
-        bookAdapter.changeCursor(results.getCursor()); //same as swapCursor but cursor.close() too. I didn't see the different
+        bookAdapter.swapCursor(results.getCursor());
+//        bookAdapter.changeCursor(results.getCursor()); //same as swapCursor but cursor.close() too. I didn't see the different
     }
 
     @Override

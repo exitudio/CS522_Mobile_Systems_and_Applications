@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Book Store</string>
+    <string name="app_name">Book Store Ekkasit Pinyoanuntapong</string>
     <string name="title_activity_add_book">Add Book</string>
     <string name="title_activity_view_book">View Book</string>
     <string name="title_activity_checkout">Checkout</string>
@@ -13,6 +13,7 @@
     <string name="title">Title:</string>
     <string name="author">Author:</string>
     <string name="isbn">ISBN:</string>
+    <string name="price">Price:</string>
 
     <string name="empty_cart">THE CART IS EMPTY!</string>
 

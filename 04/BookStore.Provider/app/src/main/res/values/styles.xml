@@ -5,4 +5,9 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="DeleteItems">
+        <!-- Customize your theme here. -->
+        <item name="android:background">@drawable/delete_selector</item>
+    </style>
+
 </resources>
