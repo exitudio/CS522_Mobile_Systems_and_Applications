@@ -32,7 +32,7 @@ public class RegisterRequest extends Request {
 
     @Override
     public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException{
-        return new RegisterResponse(connection);
+        return new RegisterResponse(connection,rd);
     }
 
     @Override

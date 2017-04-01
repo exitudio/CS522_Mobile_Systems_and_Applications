@@ -40,10 +40,15 @@ public class AsyncContentResolver extends AsyncQueryHandler {
     protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
         super.onQueryComplete(token, cookie, cursor);
         // TODO
+        if (cookie != null) {
+            @SuppressWarnings("unchecked")
+            IContinue<Cursor> callback = (IContinue<Cursor>) cookie;
+            callback.kontinue(cursor);
+        }
     }
 
-    public void deleteAsync(Uri uri, String select, String[] selectArgs) {
-        // TODO
+    public void deleteAsync(Uri uri, String selection, String[] selectionArgs, IContinue<Integer> callback) {
+        this.startDelete(0, callback, uri, selection, selectionArgs);
     }
 
     @Override

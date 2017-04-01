@@ -28,6 +28,7 @@ public abstract class Manager<T> {
         this.creator = creator;
         this.loaderID = loaderID;
         this.tag = this.getClass().getCanonicalName();
+        getAsyncResolver();
     }
 
     private ContentResolver syncResolver;

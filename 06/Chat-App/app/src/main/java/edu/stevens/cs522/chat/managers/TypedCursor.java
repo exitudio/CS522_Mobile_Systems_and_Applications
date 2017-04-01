@@ -4,10 +4,10 @@ package edu.stevens.cs522.chat.managers;
  * Created by dduggan.
  */
 
-import edu.stevens.cs522.chat.async.IEntityCreator;
-
 import android.database.ContentObserver;
 import android.database.Cursor;
+
+import edu.stevens.cs522.chat.async.IEntityCreator;
 
 public class TypedCursor<T> {
 

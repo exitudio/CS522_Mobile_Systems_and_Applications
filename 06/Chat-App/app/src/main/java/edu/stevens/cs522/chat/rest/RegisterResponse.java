@@ -1,6 +1,7 @@
 package edu.stevens.cs522.chat.rest;
 
 import android.os.Parcel;
+import android.util.JsonReader;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -11,8 +12,8 @@ import java.net.HttpURLConnection;
 
 public class RegisterResponse extends Response {
 
-    public RegisterResponse(HttpURLConnection connection) throws IOException {
-        super(connection);
+    public RegisterResponse(HttpURLConnection connection, JsonReader jsonReader) throws IOException {
+        super(connection,jsonReader);
     }
 
     @Override

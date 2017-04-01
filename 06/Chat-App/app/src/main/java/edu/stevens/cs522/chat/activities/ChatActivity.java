@@ -35,11 +35,14 @@ import android.widget.Toast;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Date;
 
 import edu.stevens.cs522.chat.R;
+import edu.stevens.cs522.chat.async.IContinue;
 import edu.stevens.cs522.chat.async.QueryBuilder;
 import edu.stevens.cs522.chat.contracts.MessageContract;
 import edu.stevens.cs522.chat.entities.ChatMessage;
+import edu.stevens.cs522.chat.entities.Peer;
 import edu.stevens.cs522.chat.managers.MessageManager;
 import edu.stevens.cs522.chat.managers.PeerManager;
 import edu.stevens.cs522.chat.managers.TypedCursor;
@@ -97,15 +100,7 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
         // TODO initialize sendResultReceiver
         sendResultReceiver = new ResultReceiverWrapper(new Handler());
 
-        /**
-         * Initialize settings to default values.
-         */
-		if (!Settings.isRegistered(this)) {
-			// TODO launch registration activity
-            //Intent intentRegister = new Intent(this, RegisterActivity.class);
-            //startActivity(intentRegister);
-            //return;
-		}
+
 
         setContentView(R.layout.messages);
 
@@ -130,6 +125,17 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
         messageText = (EditText) findViewById(R.id.message_text);
         sendButton = (Button) findViewById(R.id.send_button);
         sendButton.setOnClickListener(this);
+
+        /**
+         * Initialize settings to default values.
+         */
+//        Settings.setRegistered(this,false);
+        if (!Settings.isRegistered(this)) {
+            // TODO launch registration activity
+            Intent intentRegister = new Intent(this, RegisterActivity.class);
+            startActivity(intentRegister);
+            return;
+        }
     }
 
 	public void onResume() {
@@ -153,7 +159,8 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
         Log.i(TAG,"onCreateOptionMenu");
         super.onCreateOptionsMenu(menu);
         // TODO inflate a menu with PEERS and SETTINGS options
-
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.chatserver_menu, menu);
         return true;
     }
 
@@ -165,6 +172,8 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
 
             // TODO PEERS provide the UI for viewing list of peers
             case R.id.peers:
+                Intent intentPeers = new Intent(this, ViewPeersActivity.class);
+                startActivity(intentPeers);
                 break;
 
             // TODO SETTINGS provide the UI for settings
@@ -193,7 +202,25 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
             // TODO get chatRoom and message from UI, and use helper to post a message
             helper.postMessage(null,message);
             // TODO add the message to the database
+            final ChatMessage chatMessage = new ChatMessage();
+            chatMessage.sender = Settings.getChatName(this);
+            chatMessage.timestamp = new Date(System.currentTimeMillis());
+            chatMessage.messageText = message;
 
+            Peer sender = new Peer();
+            sender.name = chatMessage.sender;
+            sender.timestamp = chatMessage.timestamp;
+//            sender.address = receivePacket.getAddress();
+//            sender.port = receivePacket.getPort();
+
+            peerManager.persistAsync(sender, new IContinue<Long>() {
+                @Override
+                public void kontinue(Long id) {
+                    Log.i("peerManager.","persistAsync");
+                    chatMessage.senderId = id;
+                    messageManager.persistAsync(chatMessage);
+                }
+            });
 
             // End todo
 
@@ -221,6 +248,7 @@ public class ChatActivity extends Activity implements OnClickListener, QueryBuil
     @Override
     public void handleResults(TypedCursor<ChatMessage> results) {
         // TODO
+        messagesAdapter.swapCursor(results.getCursor());
     }
 
     @Override

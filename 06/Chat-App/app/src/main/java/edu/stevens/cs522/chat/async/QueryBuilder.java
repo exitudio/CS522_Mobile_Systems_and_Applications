@@ -10,10 +10,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-import edu.stevens.cs522.chat.contracts.MessageContract;
-import edu.stevens.cs522.chat.entities.ChatMessage;
-import edu.stevens.cs522.chat.managers.MessageManager;
-import edu.stevens.cs522.chat.managers.PeerManager;
 import edu.stevens.cs522.chat.managers.TypedCursor;
 
 /**
