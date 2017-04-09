@@ -43,6 +43,8 @@
     <string name="view_longitude">Longitude:</string>
     <string name="view_latitude">Latitude:</string>
 
+    <string name="server_uri_pref">Server URI Preference</string>
+    <string name="server_uri_hint">Server URI</string>
 
 
 </resources>

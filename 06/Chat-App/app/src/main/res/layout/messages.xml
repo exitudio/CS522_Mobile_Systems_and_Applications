@@ -25,6 +25,7 @@
             android:layout_weight="0.7"
             android:hint="@string/chat_room_text"
             android:inputType="text"
+            android:text="_default"
             android:textAppearance="?android:attr/textAppearanceMedium"  />
 
         <Button

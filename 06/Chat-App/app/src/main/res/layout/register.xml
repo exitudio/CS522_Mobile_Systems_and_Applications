@@ -2,24 +2,42 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
     <EditText
         android:id="@+id/chat_name_text"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="0.7"
         android:hint="@string/chat_name_text"
         android:inputType="text"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
+
+    <TextView
+        android:id="@+id/client_id_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.7"
+        android:hint="@string/client_id"
+        android:inputType="text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+    <EditText
+        android:id="@+id/server_uri_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.7"
+        android:hint="@string/server_uri_hint"
+        android:inputType="text"
+        android:text="http://192.168.1.8:8080"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
     <Button
         android:id="@+id/register_button"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:layout_weight="0.3"
         android:text="@string/register_label"
         android:textAppearance="?android:attr/textAppearanceMedium" />
-
-
 </LinearLayout>

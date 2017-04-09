@@ -35,22 +35,26 @@ public class ChatHelper {
     }
 
     // TODO provide a result receiver that will display a toast message upon completion
-    public void register (String chatName) {
+    public void register (String chatName, String serverUri) {
         if (chatName != null && !chatName.isEmpty()) {
             RegisterRequest request = new RegisterRequest(chatName, clientID);
             this.chatName = chatName;
             Settings.saveChatName(context, chatName);
+            Settings.saveServerUri(context, serverUri);
+            Settings.setRegistered(context, true);
             addRequest(request,resultReceiverWrapper);
         }
     }
 
     // TODO provide a result receiver that will display a toast message upon completion
     public void postMessage (String chatRoom, String message) {
+        this.chatName = Settings.getChatName(context);
+        this.clientID = Settings.getClientId(context);
         if (message != null && !message.isEmpty()) {
             if (chatRoom == null || chatRoom.isEmpty()) {
                 chatRoom = DEFAULT_CHAT_ROOM;
             }
-            Log.i(this.getClass().toString(), "postMessage() chatRoom="+chatRoom+", message="+message);
+            Log.i(this.getClass().toString(), "postMessage() chatName="+chatName+" chatRoom="+chatRoom+", message="+message);
             PostMessageRequest request = new PostMessageRequest(chatName, clientID, chatRoom, message);
             addRequest(request,resultReceiverWrapper);
         }

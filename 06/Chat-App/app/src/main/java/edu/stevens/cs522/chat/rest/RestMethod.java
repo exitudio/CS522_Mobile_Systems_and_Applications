@@ -29,6 +29,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
 import edu.stevens.cs522.chat.R;
+import edu.stevens.cs522.chat.settings.Settings;
 import edu.stevens.cs522.chat.util.StringUtils;
 
 /**
@@ -39,7 +40,7 @@ public class RestMethod {
 
     public static final String TAG = RestMethod.class.getCanonicalName();
 
-    public static String BASE_URL = "http://192.168.1.8:8080/chat/";
+    public static String SUB_URL = "/chat/";
     /*
      * Web service methods
      */
@@ -105,8 +106,6 @@ public class RestMethod {
         }
         getWakeLock(context, SERVICE_DURATION);
         try {
-            Log.i(TAG,"perform Register try a");
-            Log.i(TAG,"perform Register try b");
             initConnection(url, request);
             return executeRequest(PUT_METHOD,request);
         } catch (SocketTimeoutException e) {
@@ -145,7 +144,7 @@ public class RestMethod {
 
     private URL registerURL(UUID clientID) {
         try {
-            return new URL(BASE_URL+clientID.toString());//"http://exits-mbp.home:8080/chat/register"
+            return new URL(Settings.getServerUri(context)+SUB_URL+clientID.toString());//"http://exits-mbp.home:8080/chat/123"
         }
         catch (MalformedURLException e) {
             System.out.println(e.getMessage());
@@ -156,7 +155,7 @@ public class RestMethod {
 
     private URL postMessageURL(UUID clientID) {
         try {
-            return new URL(BASE_URL+clientID.toString()+"/messages");//"http://exits-mbp.home:8080/chat/register"
+            return new URL(Settings.getServerUri(context)+SUB_URL+clientID.toString()+"/messages");//"http://exits-mbp.home:8080/chat/messages"
         }
         catch (MalformedURLException e) {
             System.out.println(e.getMessage());
@@ -225,13 +224,11 @@ public class RestMethod {
 		Log.i(TAG,"initConnection");
         checkOnline();
 
-		Log.i(TAG,"initConnection a");
         // connection = (HttpsURLConnection) url.openConnection();
         connection = (HttpURLConnection) url.openConnection();
 
         connection.setRequestProperty(USER_AGENT, buildUserAgent(context));
         connection.setUseCaches(false);
-		Log.i(TAG,"initConnection b");
 
         // Possible JB bug, don't pool connections: http://stackoverflow.com/q/20367647
         // connection.setRequestProperty(CONNECTION, "Keep-Alive");
@@ -250,7 +247,6 @@ public class RestMethod {
                 Log.w(TAG, "Ignoring empty header value for "+header.getKey());
             }
         }
-		Log.i(TAG,"initConnection c");
 
     }
 

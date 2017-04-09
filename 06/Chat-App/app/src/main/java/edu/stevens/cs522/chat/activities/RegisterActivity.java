@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
@@ -42,7 +43,11 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
     /*
      * Widgets for dest address, message text, send button.
      */
+    private TextView clientIdText;
+
     private EditText userNameText;
+
+    private EditText serverUriText;
 
     private Button registerButton;
 
@@ -79,7 +84,12 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
         // TODO instantiate helper for service
         helper = new ChatHelper(this,registerResultReceiver);
 
+        clientIdText = (TextView) findViewById(R.id.client_id_text);
+        clientIdText.setText(Settings.getClientId(this).toString());
+
         userNameText = (EditText) findViewById(R.id.chat_name_text);
+
+        serverUriText = (EditText) findViewById(R.id.server_uri_text);
 
         registerButton = (Button) findViewById(R.id.register_button);
         registerButton.setOnClickListener(this);
@@ -109,28 +119,14 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
 
             String message;
 
+
+            String serverUri = serverUriText.getText().toString();
+
             // TODO get userName from UI, and use helper to register
             userName = userNameText.getText().toString();
-            helper.register(userName);
+            helper.register(userName,serverUri);
             // TODO set registered in settings upon completion
-//            UUID uuid = UUID.fromString(userName);
-//            Request request = new Request(uuid) {
-//                @Override
-//                public String getRequestEntity() throws IOException {
-//                    return null;
-//                }
-//
-//                @Override
-//                public Response getResponse(HttpURLConnection connection, JsonReader rd) throws IOException {
-//                    return null;
-//                }
-//
-//                @Override
-//                public Response process(RequestProcessor processor) {
-//                    return null;
-//                }
-//            };
-
+            //set in helper instead
             // End todo
 
             Log.i(TAG, "Registered: " + userName);
@@ -144,6 +140,9 @@ public class RegisterActivity extends Activity implements OnClickListener, Resul
             case RESULT_OK:
                 // TODO show a success toast message
                 Toast.makeText(this, "Register successfully.", Toast.LENGTH_SHORT).show();
+                if(Settings.isRegistered(this)){
+                    finish();
+                }
                 break;
             default:
                 // TODO show a failure toast message

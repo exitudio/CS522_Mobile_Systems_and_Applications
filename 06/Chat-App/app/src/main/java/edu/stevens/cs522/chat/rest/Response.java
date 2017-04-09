@@ -67,6 +67,7 @@ public abstract class Response implements Parcelable {
             }
         }
         //----------- ADD id by json instead of header -----------------
+
         jsonReader.beginObject();
         while (jsonReader.hasNext()) {
             String name = jsonReader.nextName();
