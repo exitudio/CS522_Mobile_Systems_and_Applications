@@ -1,0 +1,38 @@
+[
+  {
+    "chatroom": "_default",
+    "timestamp": 0,
+    "latitude": 0,
+    "longitude": 0,
+    "seqnum": 1,
+    "sender": "Joe",
+    "text": "hello"
+  },
+  {
+    "chatroom": "_default",
+    "timestamp": 0,
+    "latitude": 0,
+    "longitude": 0,
+    "seqnum": 2,
+    "sender": "Joe",
+    "text": "hello"
+  },
+  {
+    "chatroom": "_default",
+    "timestamp": 0,
+    "latitude": 0,
+    "longitude": 0,
+    "seqnum": 3,
+    "sender": "Joe",
+    "text": "hello"
+  },
+  {
+    "chatroom": "_default",
+    "timestamp": 0,
+    "latitude": 0,
+    "longitude": 0,
+    "seqnum": 4,
+    "sender": "Joe",
+    "text": "hello"
+  }
+]
