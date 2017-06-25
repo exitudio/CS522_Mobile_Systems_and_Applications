@@ -1,0 +1,75 @@
+<resources>
+
+    <!-- Base application theme. -->
+<!--
+    <style name="AppTheme" parent="android:Theme.Material.Light.DarkActionBar">
+-->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <!-- Customize your theme here. -->
+    </style>
+
+    <style
+        name="textSmall"
+        parent="@android:style/TextAppearance.Small">
+        <item name="android:textSize">@dimen/textSmall</item>
+    </style>
+
+    <style
+        name="textMedium"
+        parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">@dimen/textMedium</item>
+    </style>
+
+    <style
+        name="textLarge"
+        parent="@android:style/TextAppearance.Large">
+        <item name="android:textSize">@dimen/textLarge</item>
+    </style>
+
+    <style
+        name="textNormal"
+        parent="@style/textMedium">
+        <item name="android:textColor">@color/textNormal</item>
+    </style>
+
+    <style
+        name="textSubtitle"
+        parent="@style/textMedium">
+        <item name="android:textColor">@color/textSubtitle</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style
+        name="textTitle"
+        parent="@style/textLarge">
+        <item name="android:textColor">@color/textTitle</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style
+        name="textSpinner"
+        parent="@style/textMedium">
+        <item name="android:padding">@dimen/textPadding</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style
+        name="checkbox"
+        parent="@style/textMedium">
+        <item name="android:padding">@dimen/textPadding</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+
+    <style
+        name="checkboxSmall"
+        parent="@style/textSmall">
+        <item name="android:padding">@dimen/textPadding</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+    </style>
+
+
+
+</resources>
